@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Disowns the movePoint
         movePoint.parent = null;
     }
 
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
         PlayerMovement();
     }
 
+    // Handles the plauyer's grid-based movement
     private void PlayerMovement()
     {
         transform.position = Vector3.MoveTowards(transform.position,
