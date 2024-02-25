@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
     [SerializeField] private Transform movePoint;
     [SerializeField] private LayerMask whatStopsMovement;
-
-
+    public float moveSpeed = 5f;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -23,7 +22,7 @@ public class PlayerController : MonoBehaviour
         PlayerMovement();
     }
 
-    // Handles the plauyer's grid-based movement
+    // Handles the player's grid-based movement
     private void PlayerMovement()
     {
         transform.position = Vector3.MoveTowards(transform.position,

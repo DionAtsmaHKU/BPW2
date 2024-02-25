@@ -15,13 +15,13 @@ public class RoomInfo
 public class RoomController : MonoBehaviour
 {
     public static RoomController instance;
-    string currentWorldName = "Main";
-
-    RoomInfo currentLoadRoomData;
-    Queue<RoomInfo> loadRoomQueue = new Queue<RoomInfo>();
     public List<Room> loadedRooms = new List<Room>();
 
-    bool isLoadingRoom = false;
+    private string currentWorldName = "Main";
+    private RoomInfo currentLoadRoomData;
+    private Queue<RoomInfo> loadRoomQueue = new Queue<RoomInfo>();
+    private Room currentRoom;
+    private bool isLoadingRoom = false;
 
     private void Awake()
     {
@@ -30,7 +30,7 @@ public class RoomController : MonoBehaviour
 
     private void Start()
     {
-        Loss();
+        // Loss();
     }
 
     // Generates rooms in a funny pattern
@@ -82,7 +82,6 @@ public class RoomController : MonoBehaviour
         LoadRoom("Empty", 2, -4);
         LoadRoom("Empty", 3, -4);
         LoadRoom("Empty", 4, -4);
-        Debug.Log("Is this Loss?");
     }
 
     private void Update()
@@ -147,6 +146,12 @@ public class RoomController : MonoBehaviour
         room.transform.parent = transform;
 
         isLoadingRoom = false;
+
+        if (loadedRooms.Count == 0)
+        {
+            CameraController.instance.currentRoom = room;
+        }
+
         loadedRooms.Add(room);
     }
 
@@ -154,5 +159,12 @@ public class RoomController : MonoBehaviour
     public bool DoesRoomExist(int x, int y)
     {
         return loadedRooms.Find(item => item.x == x && item.y == y) != null; 
+    }
+
+    // Sets the current room for the cameracontroller to the room the player is entering
+    public void OnPlayerEnterRoom(Room room)
+    {
+        CameraController.instance.currentRoom = room;
+        currentRoom = room;
     }
 }
