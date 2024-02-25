@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using System.Linq;
 
 public class RoomInfo
 {
@@ -21,7 +22,11 @@ public class RoomController : MonoBehaviour
     private RoomInfo currentLoadRoomData;
     private Queue<RoomInfo> loadRoomQueue = new Queue<RoomInfo>();
     private Room currentRoom;
+
     private bool isLoadingRoom = false;
+    private bool spawnedBossRoom = false;
+    private bool updatedRooms = false;
+
 
     private void Awake()
     {
@@ -93,8 +98,25 @@ public class RoomController : MonoBehaviour
      * currently isn't already another room being loaded. */
     private void UpdateRoomQueue()
     {
-        if (isLoadingRoom || loadRoomQueue.Count == 0)
+        if (isLoadingRoom)
         {
+            return;
+        }
+
+        if (loadRoomQueue.Count == 0)
+        {
+            if (!spawnedBossRoom)
+            {
+                StartCoroutine(SpawnBossRoom());
+            }
+            else if (spawnedBossRoom && !updatedRooms)
+            {
+                foreach(Room room in loadedRooms)
+                {
+                    room.RemoveUnconnectedDoors();
+                }
+                updatedRooms = true;
+            }
             return;
         }
 
@@ -102,6 +124,22 @@ public class RoomController : MonoBehaviour
         isLoadingRoom = true;
 
         StartCoroutine(LoadRoomRoutine(currentLoadRoomData));
+    }
+
+    // IMPORTANT !!! understand soon
+    IEnumerator SpawnBossRoom()
+    {
+        spawnedBossRoom = true;
+        yield return new WaitForSeconds(0.5f);
+        if (loadRoomQueue.Count == 0)
+        {
+            Room bossRoom = loadedRooms[loadedRooms.Count - 1];
+            Room tempRoom = new Room(bossRoom.x, bossRoom.y);
+            Destroy(bossRoom.gameObject);
+            var roomToRemove = loadedRooms.Single(r => r.x == tempRoom.x && r.y == tempRoom.y);
+            loadedRooms.Remove(roomToRemove);
+            LoadRoom("End", tempRoom.x, tempRoom.y);
+        }
     }
 
     /* Starts loading a new room and adds it to the queue, first giving it
@@ -137,6 +175,13 @@ public class RoomController : MonoBehaviour
      * all the data it needs (name and position) */
     public void RegisterRoom(Room room)
     {
+        if (DoesRoomExist(currentLoadRoomData.x, currentLoadRoomData.y))
+        {
+            Destroy(room.gameObject);
+            isLoadingRoom = false;
+            return;
+        }
+
         room.transform.position = new Vector3(currentLoadRoomData.x * room.width,
                                               currentLoadRoomData.y * room.height);
 
@@ -159,6 +204,11 @@ public class RoomController : MonoBehaviour
     public bool DoesRoomExist(int x, int y)
     {
         return loadedRooms.Find(item => item.x == x && item.y == y) != null; 
+    }
+
+    public Room FindRoom(int x, int y)
+    {
+        return loadedRooms.Find(item => item.x == x && item.y == y);
     }
 
     // Sets the current room for the cameracontroller to the room the player is entering
