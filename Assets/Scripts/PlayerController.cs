@@ -2,13 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Transform movePoint;
     [SerializeField] private LayerMask whatStopsMovement;
     public float moveSpeed = 5f;
-    
+
+    // Action Test to get to GameOver
+    public static event Action onPlayerDeath;
+
+    private void OnEnable()
+    {
+        onPlayerDeath += PlayerExpand;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +29,11 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         PlayerMovement();
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            onPlayerDeath?.Invoke();
+        }
     }
 
     // Handles the player's grid-based movement
@@ -45,5 +59,10 @@ public class PlayerController : MonoBehaviour
                 movePoint.position += new Vector3(0, movement.y, 0);
             }
         }
+    }
+
+    void PlayerExpand()
+    {
+        transform.localScale *= 2;
     }
 }

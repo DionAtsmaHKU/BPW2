@@ -35,11 +35,11 @@ public class RoomController : MonoBehaviour
 
     private void Start()
     {
-        // Loss();
+        // TestRooms();
     }
 
-    // Generates rooms in a funny pattern
-    private void Loss()
+    // Generates rooms in a pattern
+    private void TestRooms()
     {
         LoadRoom("Start", 0, 0);
         LoadRoom("Empty", 1, 0);
@@ -153,6 +153,7 @@ public class RoomController : MonoBehaviour
 
         RoomInfo newRoomData = new RoomInfo();
         newRoomData.name = name;
+        Debug.Log(newRoomData.name);
         newRoomData.x = x;
         newRoomData.y = y;
 
@@ -163,6 +164,7 @@ public class RoomController : MonoBehaviour
     IEnumerator LoadRoomRoutine(RoomInfo info)
     {
         string roomName = currentWorldName + info.name;
+        Debug.Log("Actual name: " + currentWorldName + info.name);
         AsyncOperation loadRoom = SceneManager.LoadSceneAsync(roomName, LoadSceneMode.Additive);
 
         while (!loadRoom.isDone)
@@ -188,6 +190,7 @@ public class RoomController : MonoBehaviour
         room.x = currentLoadRoomData.x;
         room.y = currentLoadRoomData.y;
         room.name = currentWorldName + " - " + currentLoadRoomData.name + " " + room.x + " - " + room.y;
+        Debug.Log("room.name = " + room.name);
         room.transform.parent = transform;
 
         isLoadingRoom = false;

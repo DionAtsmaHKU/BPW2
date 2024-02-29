@@ -28,6 +28,7 @@ public class CrawlController : MonoBehaviour
 
         for (int i = 0; i < dungeonData.numberOfCrawlers; i++)
         {
+            // make instance first?
             dungeonCrawlers.Add(new Crawler(Vector2Int.zero));
         }
 
