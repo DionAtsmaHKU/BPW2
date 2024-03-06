@@ -20,13 +20,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/DungeonRooms/MainEnd.unity
     guid: fc8ed60e5a0a43c4bbae1a38db089124
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/DungeonRooms/MainRandomA.unity
     guid: 7602d443e2d193b4da39761314afb70a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/DungeonRooms/MainRandomB.unity
     guid: 5ac5f03cbb06e9946912f02f4d8849f2
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/DungeonRooms/MainRandomC.unity
     guid: f9c7d9f587407b841a9d2596b60fdd3f
   m_configObjects: {}

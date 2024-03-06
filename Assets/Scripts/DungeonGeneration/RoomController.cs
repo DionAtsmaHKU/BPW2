@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using System.Linq;
+using System;
 
 public class RoomInfo
 {
@@ -27,6 +28,7 @@ public class RoomController : MonoBehaviour
     private bool spawnedBossRoom = false;
     private bool updatedRooms = false;
 
+    public static event Action OnRoomGenFinished;
 
     private void Awake()
     {
@@ -113,9 +115,11 @@ public class RoomController : MonoBehaviour
             {
                 foreach(Room room in loadedRooms)
                 {
+                    room.PlaceFloor();
                     room.RemoveUnconnectedDoors();
                 }
                 updatedRooms = true;
+                OnRoomGenFinished.Invoke();
             }
             return;
         }
@@ -139,6 +143,13 @@ public class RoomController : MonoBehaviour
             var roomToRemove = loadedRooms.Single(r => r.x == tempRoom.x && r.y == tempRoom.y);
             loadedRooms.Remove(roomToRemove);
             LoadRoom("End", tempRoom.x, tempRoom.y);
+            
+            /*
+            foreach (Room room in loadedRooms)
+            {
+                room.RemoveUnconnectedDoors();
+            }
+            */
         }
     }
 
@@ -164,7 +175,7 @@ public class RoomController : MonoBehaviour
     IEnumerator LoadRoomRoutine(RoomInfo info)
     {
         string roomName = currentWorldName + info.name;
-        Debug.Log("Actual name: " + currentWorldName + info.name);
+        // Debug.Log("Actual name: " + currentWorldName + info.name);
         AsyncOperation loadRoom = SceneManager.LoadSceneAsync(roomName, LoadSceneMode.Additive);
 
         while (!loadRoom.isDone)
@@ -190,7 +201,7 @@ public class RoomController : MonoBehaviour
         room.x = currentLoadRoomData.x;
         room.y = currentLoadRoomData.y;
         room.name = currentWorldName + " - " + currentLoadRoomData.name + " " + room.x + " - " + room.y;
-        Debug.Log("room.name = " + room.name);
+        // Debug.Log("room.name = " + room.name);
         room.transform.parent = transform;
 
         isLoadingRoom = false;

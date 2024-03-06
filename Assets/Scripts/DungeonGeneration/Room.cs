@@ -1,6 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
+
+public class RoomData
+{
+    public HashSet<Vector2Int> Path { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> Floor { get; private set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> NearWallTilesUp { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> NearWallTilesDown { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> NearWallTilesRight { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> NearWallTilesLeft { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> CornerTiles { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> InnterTiles { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> PropPositions { get; set; } = new HashSet<Vector2Int>();
+}
 
 public class Room : MonoBehaviour
 {
@@ -8,6 +23,12 @@ public class Room : MonoBehaviour
     public int height;
     public int x;
     public int y;
+    public Vector2Int worldOrigin;
+
+    [SerializeField] private Tilemap floorMap, colliderMap;
+    [SerializeField] private TileBase floorTile, pathTile;
+
+    public RoomData roomData;
 
     public Room(int temp_x, int temp_y)
     {
@@ -21,6 +42,17 @@ public class Room : MonoBehaviour
 
     private bool updatedDoors = false;
 
+    private void OnEnable()
+    {
+        // RoomController.OnRoomGenFinished += PlaceFloor;
+    }
+
+    private void Awake()
+    {
+        roomData = new RoomData();
+        worldOrigin = GetRoomCentre();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -31,6 +63,7 @@ public class Room : MonoBehaviour
         }
 
         // Collecting the doors and ordering them by type. (?)
+        // THIS NEXT LINE DOESN'T WORK IN MONOBEHAVIOUR
         Door[] ds = GetComponentsInChildren<Door>();
         foreach (Door d in ds)
         {
@@ -52,6 +85,7 @@ public class Room : MonoBehaviour
         RoomController.instance.RegisterRoom(this);
     }
 
+    // Call this somehwere else
     private void Update()
     {
         if (name.Contains("End") && !updatedDoors)
@@ -72,29 +106,94 @@ public class Room : MonoBehaviour
                     if (GetRight() != null)
                     {
                         door.gameObject.SetActive(false);
+                        roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin + new Vector2Int(width / 2, 0)));
+                        // PlacePaths(roomCentre, roomCentre + new Vector2Int(width / 2, 0));
                     }
                     break;
                 case Door.DoorType.left:
                     if (GetLeft() != null)
                     {
                         door.gameObject.SetActive(false);
+                        // PlacePaths(roomCentre, roomCentre - new Vector2Int(width/2, 0));
+                        roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin - new Vector2Int(width / 2, 0)));
                     }
                     break;
                 case Door.DoorType.top:
                     if (GetTop() != null)
                     {
                         door.gameObject.SetActive(false);
+                        roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin + new Vector2Int(0, height / 2)));
+                        // PlacePaths(roomCentre, roomCentre + new Vector2Int(0, height / 2));
                     }
                     break;
                 case Door.DoorType.bottom:
                     if (GetBottom() != null)
                     {
                         door.gameObject.SetActive(false);
+                        roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin - new Vector2Int(0, height / 2)));
+                        // PlacePaths(roomCentre, roomCentre - new Vector2Int(0, height / 2));
                     }
                     break;
             }
         }
     }
+    public HashSet<Vector2Int> PlaceFloor()
+    {
+        if (name.Contains("Start") || name.Contains("End")) {
+            return null;
+        }
+        Vector2Int roomCentre = GetRoomCentre() / 2;
+
+        int leftLimit = roomCentre.x - (width - 3)/2;
+        int rightLimit = roomCentre.x + (width - 3)/2;
+        int downLimit = roomCentre.y - (height - 3)/2;
+        int upLimit = roomCentre.y + (height - 3)/2;
+
+        for (int x = leftLimit; x <= rightLimit; x++) 
+        { 
+            for (int y = downLimit; y <= upLimit; y++)
+            {
+                Vector2 position = roomCentre + new Vector2Int(x, y);
+                Vector3Int positionInt = floorMap.WorldToCell(position);
+                roomData.Floor.Add((Vector2Int)positionInt);
+                floorMap.SetTile(positionInt, floorTile);
+            }
+        }
+
+        HashSet<Vector2Int> floorTiles = new();
+        // Vector3Int centreInt = floorMap.WorldToCell((Vector2)roomCentre);
+        // colliderMap.SetTile(centreInt, pathTile);
+
+        return floorTiles;
+    }
+
+    private HashSet<Vector2Int> PlacePaths(Vector2Int startPos, Vector2Int endPos)
+    {
+        // Debug.Log(startPos);
+
+        // Create a hashset and add start and end positions to it
+        HashSet<Vector2Int> pathTiles = new() { startPos, endPos };
+        floorMap.SetTile((Vector3Int)startPos, pathTile);
+        floorMap.SetTile((Vector3Int)endPos, pathTile);
+
+        // Find direction of the path
+        Vector2Int direction = Vector2Int.CeilToInt(((Vector2)endPos - startPos).normalized);
+        Vector2Int currentPos = startPos;
+        
+        // Add tiles from startPos to endPos
+        while (Vector2.Distance(currentPos, endPos) > 1)
+        {
+            currentPos += direction;
+            pathTiles.Add(currentPos);
+            // Debug.Log("Placing at: " + currentPos);
+            floorMap.SetTile((Vector3Int)currentPos, null);
+            floorMap.SetTile((Vector3Int)currentPos, pathTile);
+        }
+
+        return pathTiles;
+    }
+
+
 
     public Room GetRight()
     {
@@ -140,9 +239,9 @@ public class Room : MonoBehaviour
     }
 
     // Returns the centre of the room as a Vector3 (with z = 0)
-    public Vector3 GetRoomCentre()
+    public Vector2Int GetRoomCentre()
     {
-        return new Vector3(x * width, y * height);
+        return new Vector2Int(x * width - 1, y * height - 1);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

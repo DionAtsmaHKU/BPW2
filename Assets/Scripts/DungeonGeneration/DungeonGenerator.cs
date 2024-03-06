@@ -22,8 +22,9 @@ public class DungeonGenerator : MonoBehaviour
         foreach(Vector2Int roomLocation in rooms)
         {
             //RoomController.instance.LoadRoom("Empty", roomLocation.x, roomLocation.y); Debug.Log("case");
-            
-            Debug.Log("foreach reached");
+            RoomController.instance.LoadRoom("Empty", roomLocation.x, roomLocation.y);
+            // Debug.Log("foreach reached");
+            /*
             int roomType = Random.Range(0, 4);
             //int roomType = 1;
             Debug.Log(roomType);
@@ -38,7 +39,7 @@ public class DungeonGenerator : MonoBehaviour
                 case 3: RoomController.instance.LoadRoom("RandomC", roomLocation.x, roomLocation.y); Debug.Log("case");
                     break;
             }
-            
+            */
         }
     }
 }

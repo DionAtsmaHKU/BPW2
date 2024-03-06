@@ -35,8 +35,8 @@ public class CameraController : MonoBehaviour
     {
         if (currentRoom == null) { return Vector3.zero;}
 
-        Vector3 targetPos = currentRoom.GetRoomCentre();
-        return new Vector3(targetPos.x, targetPos.y, -10);
+        Vector2Int targetPos = currentRoom.GetRoomCentre();
+        return new Vector3(targetPos.x + 1, targetPos.y + 1, -10);
     }
 
     // Checks whether there is currently a scene switch going on
