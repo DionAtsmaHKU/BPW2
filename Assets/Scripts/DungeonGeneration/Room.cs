@@ -142,19 +142,33 @@ public class Room : MonoBehaviour
         if (name.Contains("Start") || name.Contains("End")) {
             return null;
         }
-        Vector2Int roomCentre = GetRoomCentre() / 2;
+        Debug.Log(new Vector4(x, y, width, height));
+        // Vector2Int roomCentre = GetRoomCentre()/2;
+        Vector2Int roomCentre = GetRoomCentre();
+        // Vector2Int roomCentre = worldOrigin;
+        /*
+        int leftLimit = roomCentre.x - width / 2 - 2;
+        int rightLimit = roomCentre.x + width / 2 - 2;
+        int downLimit = roomCentre.y - height / 2 - 2;
+        int upLimit = roomCentre.y + height / 2 - 2;
+        */
 
-        int leftLimit = roomCentre.x - (width - 3)/2;
-        int rightLimit = roomCentre.x + (width - 3)/2;
-        int downLimit = roomCentre.y - (height - 3)/2;
-        int upLimit = roomCentre.y + (height - 3)/2;
+        
+        int leftLimit = roomCentre.x - width/2 + 2;
+        int rightLimit = roomCentre.x + width/2;
+        int downLimit = roomCentre.y - height/2 + 2;
+        int upLimit = roomCentre.y + height/2;
+        
 
-        for (int x = leftLimit; x <= rightLimit; x++) 
+        for (int i = leftLimit; i <= rightLimit; i++) 
         { 
-            for (int y = downLimit; y <= upLimit; y++)
+            for (int j = downLimit; j <= upLimit; j++)
             {
-                Vector2 position = roomCentre + new Vector2Int(x, y);
+                // Vector2Int position = roomCentre + new Vector2Int(i, j);
+                // Vector3Int positionInt = floorMap.WorldToCell(position);
+                Vector2 position = new Vector2Int(i, j);
                 Vector3Int positionInt = floorMap.WorldToCell(position);
+                // Vector3Int positionInt = new Vector3Int(position.x, position.y);
                 roomData.Floor.Add((Vector2Int)positionInt);
                 floorMap.SetTile(positionInt, floorTile);
             }
@@ -241,6 +255,8 @@ public class Room : MonoBehaviour
     // Returns the centre of the room as a Vector3 (with z = 0)
     public Vector2Int GetRoomCentre()
     {
+        //return new Vector2Int(x * (width - 1), y * (height - 1));
+        Debug.Log(new Vector2Int(x * width - 1, y * height - 1));
         return new Vector2Int(x * width - 1, y * height - 1);
     }
 
