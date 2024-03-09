@@ -13,8 +13,11 @@ public class RoomData
     public HashSet<Vector2Int> NearWallTilesRight { get; set; } = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> NearWallTilesLeft { get; set; } = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> CornerTiles { get; set; } = new HashSet<Vector2Int>();
-    public HashSet<Vector2Int> InnterTiles { get; set; } = new HashSet<Vector2Int>();
+    public HashSet<Vector2Int> InnerTiles { get; set; } = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> PropPositions { get; set; } = new HashSet<Vector2Int>();
+    public List<GameObject> PropObjectRefrences { get; set; } = new List<GameObject>();
+    public List<Vector2Int> PositionsAccessibleFromPath { get; set; } = new List<Vector2Int>();
+    public List<GameObject> EnemiesInRoom { get; set; } = new List<GameObject>();
 }
 
 public class Room : MonoBehaviour
@@ -28,6 +31,7 @@ public class Room : MonoBehaviour
     [SerializeField] private Tilemap floorMap, colliderMap;
     [SerializeField] private TileBase floorTile, pathTile;
 
+    public RoomDataExtractor roomDataExtractor;
     public RoomData roomData;
 
     public Room(int temp_x, int temp_y)
@@ -40,11 +44,13 @@ public class Room : MonoBehaviour
     public Door leftDoor, rightDoor, topDoor, bottomDoor;
     public List<Door> doors = new List<Door>();
 
+    public bool showGizmo = false;
     private bool updatedDoors = false;
+
 
     private void OnEnable()
     {
-        // RoomController.OnRoomGenFinished += PlaceFloor;
+        ;
     }
 
     private void Awake()
@@ -137,6 +143,7 @@ public class Room : MonoBehaviour
             }
         }
     }
+
     public HashSet<Vector2Int> PlaceFloor()
     {
         if (name.Contains("Start") || name.Contains("End")) {
@@ -207,8 +214,6 @@ public class Room : MonoBehaviour
         return pathTiles;
     }
 
-
-
     public Room GetRight()
     {
         if (RoomController.instance.DoesRoomExist(x + 1, y))
@@ -256,7 +261,7 @@ public class Room : MonoBehaviour
     public Vector2Int GetRoomCentre()
     {
         //return new Vector2Int(x * (width - 1), y * (height - 1));
-        Debug.Log(new Vector2Int(x * width - 1, y * height - 1));
+        // Debug.Log(new Vector2Int(x * width - 1, y * height - 1));
         return new Vector2Int(x * width - 1, y * height - 1);
     }
 
@@ -266,5 +271,117 @@ public class Room : MonoBehaviour
         {
             RoomController.instance.OnPlayerEnterRoom(this);
         }
+    }
+
+    public void ProcessRooms()
+    {
+        //foreach (Room room in roomController.loadedRooms)
+        //{
+        // RoomData roomData = room.roomData;
+        if (roomData == null)
+            return;
+
+        foreach (Vector2Int tilePosition in roomData.Floor)
+        {
+            int neighboursCount = 4;
+
+            // Find Wall Tiles
+            if (!roomData.Floor.Contains(tilePosition + Vector2Int.up))
+            {
+                roomData.NearWallTilesUp.Add(tilePosition);
+                neighboursCount--;
+            }
+            if (!roomData.Floor.Contains(tilePosition + Vector2Int.down))
+            {
+                roomData.NearWallTilesDown.Add(tilePosition);
+                neighboursCount--;
+            }
+            if (!roomData.Floor.Contains(tilePosition + Vector2Int.right))
+            {
+                roomData.NearWallTilesRight.Add(tilePosition);
+                neighboursCount--;
+            }
+            if (!roomData.Floor.Contains(tilePosition + Vector2Int.left))
+            {
+                roomData.NearWallTilesLeft.Add(tilePosition);
+                neighboursCount--;
+            }
+
+            // Find Corner Tiles
+            if (neighboursCount <= 2)
+            {
+                roomData.CornerTiles.Add(tilePosition);
+            }
+            if (neighboursCount == 4)
+            {
+                roomData.InnerTiles.Add(tilePosition);
+            }
+            //}
+
+            roomData.NearWallTilesDown.ExceptWith(roomData.CornerTiles);
+            roomData.NearWallTilesUp.ExceptWith(roomData.CornerTiles);
+            roomData.NearWallTilesLeft.ExceptWith(roomData.CornerTiles);
+            roomData.NearWallTilesRight.ExceptWith(roomData.CornerTiles);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        //foreach (Room room in roomController.loadedRooms)
+        //{
+        //   RoomData roomData = room.roomData;
+
+        if (roomData == null || !showGizmo)
+            return;
+
+        //Draw inner tiles
+        Gizmos.color = Color.yellow;
+        foreach (Vector2Int floorPosition in roomData.InnerTiles)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //Draw near wall tiles UP
+        Gizmos.color = Color.blue;
+        foreach (Vector2Int floorPosition in roomData.NearWallTilesUp)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //Draw near wall tiles DOWN
+        Gizmos.color = Color.green;
+        foreach (Vector2Int floorPosition in roomData.NearWallTilesDown)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //Draw near wall tiles RIGHT
+        Gizmos.color = Color.white;
+        foreach (Vector2Int floorPosition in roomData.NearWallTilesRight)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //Draw near wall tiles LEFT
+        Gizmos.color = Color.cyan;
+        foreach (Vector2Int floorPosition in roomData.NearWallTilesLeft)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //Draw near wall tiles CORNERS
+        Gizmos.color = Color.magenta;
+        foreach (Vector2Int floorPosition in roomData.CornerTiles)
+        {
+            if (roomData.Path.Contains(floorPosition))
+                continue;
+            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
+        }
+        //}
     }
 }

@@ -29,6 +29,7 @@ public class RoomController : MonoBehaviour
     private bool updatedRooms = false;
 
     public static event Action OnRoomGenFinished;
+    // public static event Action OnRoomsProcessed;
 
     private void Awake()
     {
@@ -113,13 +114,21 @@ public class RoomController : MonoBehaviour
             }
             else if (spawnedBossRoom && !updatedRooms)
             {
-                foreach(Room room in loadedRooms)
+                foreach (Room room in loadedRooms)
                 {
-                    room.PlaceFloor();
+                    //if (!name.Contains("End") && !name.Contains("Start"))
+                    //{
+                    //    room.PlaceFloor();
+                    //    RoomDataExtractor roomDataExtractor = room.GetComponent<RoomDataExtractor>();
+                    //   roomDataExtractor.ProcessRooms();
+                    //}
+                    room.PlaceFloor();                
                     room.RemoveUnconnectedDoors();
+                    room.ProcessRooms();
                 }
                 updatedRooms = true;
                 OnRoomGenFinished.Invoke();
+                // OnRoomsProcessed.Invoke();
             }
             return;
         }
