@@ -1679,8 +1679,14 @@ MonoBehaviour:
   room: {fileID: 302612843}
   propsToPlace:
   - {fileID: 11400000, guid: f5e13ad07f5de9e42b7b00d896fc8464, type: 2}
+  - {fileID: 11400000, guid: debff4008bb95de4f892ca486a965d5a, type: 2}
+  - {fileID: 11400000, guid: ed82a268aef1ef54cacb4f1c4faffdac, type: 2}
+  - {fileID: 11400000, guid: 3fabea4053b577c4c8c1caf3d66b27e7, type: 2}
+  - {fileID: 11400000, guid: 286378efa3c11af489d59859461ae7fc, type: 2}
+  - {fileID: 11400000, guid: b0343acc7bfa1c54abd136f30d016943, type: 2}
   cornerPropPlacementChance: 0.5
   propPrefab: {fileID: 5333753092155400382, guid: 37ab54b703c234f408f8375609821831, type: 3}
+  enemyPrefab: {fileID: 6272595230693292800, guid: e4371910790cdb541aa0aa20caca3b02, type: 3}
 --- !u!4 &1025001205
 Transform:
   m_ObjectHideFlags: 0

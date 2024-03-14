@@ -32,7 +32,7 @@ public class PropPlacementManager : MonoBehaviour
 
     public void ProcessRoom()
     {
-        if (roomData == null || name.Contains("End") || name.Contains("Start"))
+        if (roomData == null || name.Contains("Start") || name == null)
             return;
         
         // Place props in corners
@@ -192,10 +192,11 @@ public class PropPlacementManager : MonoBehaviour
                 Prop propToPlace = cornerProps[UnityEngine.Random.Range(0, cornerProps.Count)];
                 PlacePropGameObjectAt(cornerTile, propToPlace);
 
+                /*
                 if (propToPlace.placeAsGroup)
                 {
                     PlaceGroupObject(cornerTile, propToPlace, 2);
-                } 
+                } */
             }
             else
             {
@@ -206,12 +207,21 @@ public class PropPlacementManager : MonoBehaviour
 
     private GameObject PlacePropGameObjectAt(Vector2Int placementPosition, Prop propToPlace)
     {
-        // Instantiate prop
+        // Instantiate prop or enemy
         GameObject prop = Instantiate(propPrefab);
+        if (propToPlace.isEnemy)
+        {
+            prop.AddComponent<Enemy>();
+            Enemy enemyScript = prop.GetComponent<Enemy>();
+            enemyScript.homeRoom = room;
+        } 
+
         SpriteRenderer propSpriteRenderer = prop.GetComponentInChildren<SpriteRenderer>();
 
         // Set the sprite
         propSpriteRenderer.sprite = propToPlace.propSprite;
+
+        
 
         // Add a collider
         CapsuleCollider2D col = propSpriteRenderer.gameObject.AddComponent<CapsuleCollider2D>();
@@ -227,8 +237,10 @@ public class PropPlacementManager : MonoBehaviour
         propSpriteRenderer.transform.localPosition = (Vector2)propToPlace.propSize * 0.5f + room.GetRoomCentre() + Vector2.one * 1.5f;
 
         // Add to StopMovement layer
-        // prop.layer = LayerMask.NameToLayer("StopMovement");
-
+        // Debug.Log("Layer voor: " + prop.layer);
+        // prop.layer = 6;
+        prop.layer = LayerMask.NameToLayer("StopMovement");
+        // Debug.Log("Layer na: " + prop.layer);
         // Save the prop in roomData
         roomData.PropPositions.Add(placementPosition);
         roomData.PropObjectRefrences.Add(prop);

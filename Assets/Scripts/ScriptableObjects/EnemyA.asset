@@ -10,18 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3971922910277594c97029d03ee87a3d, type: 3}
-  m_Name: Barrel
+  m_Name: EnemyA
   m_EditorClassIdentifier: 
-  propSprite: {fileID: -282178103, guid: b85bdb1e782899647a1aab1dfe435966, type: 3}
+  propSprite: {fileID: -527340448, guid: b85bdb1e782899647a1aab1dfe435966, type: 3}
   propSize: {x: 1, y: 1}
-  corner: 1
-  nearwallUp: 1
-  nearwallDown: 1
-  nearwallRight: 1
-  nearwallLeft: 1
-  inner: 0
-  quantityMin: 1
-  quantityMax: 1
-  placeAsGroup: 0
-  minGroupCount: 1
-  maxGroupCount: 1
+  isEnemy: 1
+  corner: 0
+  nearwallUp: 0
+  nearwallDown: 0
+  nearwallRight: 0
+  nearwallLeft: 0
+  inner: 1
+  quantityMin: 2
+  quantityMax: 4

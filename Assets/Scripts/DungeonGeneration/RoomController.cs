@@ -17,6 +17,7 @@ public class RoomInfo
 public class RoomController : MonoBehaviour
 {
     public static RoomController instance;
+    [SerializeField] TurnManager turnManager;
     public List<Room> loadedRooms = new List<Room>();
 
     private string currentWorldName = "Main";
@@ -148,6 +149,7 @@ public class RoomController : MonoBehaviour
         {
             Room bossRoom = loadedRooms[loadedRooms.Count - 1];
             Room tempRoom = new Room(bossRoom.x, bossRoom.y);
+            // tempRoom.name = "Temp";
             Destroy(bossRoom.gameObject);
             var roomToRemove = loadedRooms.Single(r => r.x == tempRoom.x && r.y == tempRoom.y);
             loadedRooms.Remove(roomToRemove);
@@ -237,6 +239,7 @@ public class RoomController : MonoBehaviour
     // Sets the current room for the cameracontroller to the room the player is entering
     public void OnPlayerEnterRoom(Room room)
     {
+        turnManager.roomEnemies.Clear();
         CameraController.instance.currentRoom = room;
         currentRoom = room;
     }

@@ -6,9 +6,12 @@ using System;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Transform movePoint;
-    [SerializeField] private LayerMask whatStopsMovement;
+    [SerializeField] Transform movePoint;
+    [SerializeField] LayerMask whatStopsMovement;
+    private TurnManager turnManager;
     public float moveSpeed = 5f;
+    public int turnSteps;
+    public bool isMovingThisTurn;
 
     // Action Test to get to GameOver
     public static event Action onPlayerDeath;
@@ -21,14 +24,24 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // Disowns the movePoint
+        turnManager = FindAnyObjectByType<TurnManager>();
+
+        // Disowns the movePoint (I can have one joke in here right)
         movePoint.parent = null;
     }
 
     // Update is called once per frame
     void Update()
     {
-        PlayerMovement();
+        if (turnManager.playerMoves > 0)
+        {
+            PlayerMovement();
+            if (!isMovingThisTurn)
+            {
+                AttackAction();
+                StanceChangeAction();
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.E))
         {
@@ -51,14 +64,41 @@ public class PlayerController : MonoBehaviour
                                 + new Vector3(movement.x, 0, 0), 0.1f, whatStopsMovement))
             {
                 movePoint.position += new Vector3(movement.x, 0, 0);
+                turnSteps++;
+                MoveAction();
             }
 
             else if (Mathf.Abs(movement.y) == 1f && !Physics2D.OverlapCircle(movePoint.position
                                 + new Vector3(0, movement.y, 0), 0.1f, whatStopsMovement))
             {
                 movePoint.position += new Vector3(0, movement.y, 0);
+                turnSteps++;
+                MoveAction();
             }
         }
+    }
+
+    private void MoveAction()
+    {
+        if (turnSteps % 2 == 1)
+        {
+            isMovingThisTurn = true;
+        }
+        else if (turnSteps % 2 == 0)
+        {
+            turnManager.playerMoves--;
+            isMovingThisTurn = false;
+        }
+    }
+
+    private void AttackAction()
+    {
+
+    }
+
+    private void StanceChangeAction()
+    {
+
     }
 
     void PlayerExpand()

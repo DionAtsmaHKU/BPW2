@@ -42,6 +42,12 @@ public class CameraController : MonoBehaviour
     // Checks whether there is currently a scene switch going on
     public bool isSwitchingScene()
     {
-        return transform.position.Equals(GetCamTargetPos()) == false;
+        if (!transform.position.Equals(GetCamTargetPos()))
+        {
+            Debug.Log("Switching Scenes!");
+            return true;
+
+        }
+        return false;
     }
 }

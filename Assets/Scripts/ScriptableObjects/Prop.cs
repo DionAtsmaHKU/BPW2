@@ -8,6 +8,7 @@ public class Prop : ScriptableObject
     [Header("Prop data:")]
     public Sprite propSprite;
     public Vector2Int propSize = Vector2Int.one;
+    public bool isEnemy = false;
 
     [Space, Header("Placement type:")]
     public bool corner = true;
@@ -21,10 +22,13 @@ public class Prop : ScriptableObject
     [Min(1)]
     public int quantityMax = 1;
 
+    /*
     [Space, Header("Group placement:")]
     public bool placeAsGroup = false;
     [Min(1)]
     public int minGroupCount = 1;
     [Min(1)]
     public int maxGroupCount = 1;
+    8
+    */
 }
