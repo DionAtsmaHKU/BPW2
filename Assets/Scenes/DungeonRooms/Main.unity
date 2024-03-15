@@ -1214,7 +1214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!212 &2014186940
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1299,8 +1299,12 @@ MonoBehaviour:
   whatStopsMovement:
     serializedVersion: 2
     m_Bits: 64
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
   moveSpeed: 5
   turnSteps: 0
+  isMovingThisTurn: 0
 --- !u!61 &2014186943
 BoxCollider2D:
   m_ObjectHideFlags: 0

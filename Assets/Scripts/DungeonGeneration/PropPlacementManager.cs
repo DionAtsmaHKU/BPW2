@@ -18,7 +18,7 @@ public class PropPlacementManager : MonoBehaviour
     private float cornerPropPlacementChance = 0.5f;
 
     [SerializeField]
-    private GameObject propPrefab;
+    private GameObject propPrefab, enemyPrefab;
 
     private void OnEnable()
     {
@@ -208,20 +208,19 @@ public class PropPlacementManager : MonoBehaviour
     private GameObject PlacePropGameObjectAt(Vector2Int placementPosition, Prop propToPlace)
     {
         // Instantiate prop or enemy
-        GameObject prop = Instantiate(propPrefab);
+        GameObject prop;
         if (propToPlace.isEnemy)
         {
+            prop = Instantiate(enemyPrefab);
             prop.AddComponent<Enemy>();
             Enemy enemyScript = prop.GetComponent<Enemy>();
             enemyScript.homeRoom = room;
-        } 
+        } else { prop = Instantiate(propPrefab); }
 
         SpriteRenderer propSpriteRenderer = prop.GetComponentInChildren<SpriteRenderer>();
 
         // Set the sprite
         propSpriteRenderer.sprite = propToPlace.propSprite;
-
-        
 
         // Add a collider
         CapsuleCollider2D col = propSpriteRenderer.gameObject.AddComponent<CapsuleCollider2D>();
@@ -239,9 +238,10 @@ public class PropPlacementManager : MonoBehaviour
         // Add to StopMovement layer
         // Debug.Log("Layer voor: " + prop.layer);
         // prop.layer = 6;
-        prop.layer = LayerMask.NameToLayer("StopMovement");
+        // prop.layer = LayerMask.NameToLayer("StopMovement");
         // Debug.Log("Layer na: " + prop.layer);
         // Save the prop in roomData
+
         roomData.PropPositions.Add(placementPosition);
         roomData.PropObjectRefrences.Add(prop);
         return prop;

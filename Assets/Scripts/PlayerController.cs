@@ -7,11 +7,13 @@ using System;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] Transform movePoint;
-    [SerializeField] LayerMask whatStopsMovement;
+    public LayerMask whatStopsMovement;
+    public LayerMask enemyLayer;
     private TurnManager turnManager;
     public float moveSpeed = 5f;
     public int turnSteps;
     public bool isMovingThisTurn;
+    private int stepsPerTurn = 2;
 
     // Action Test to get to GameOver
     public static event Action onPlayerDeath;
@@ -33,12 +35,17 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (turnManager.playerMoves > 0)
+        if (turnManager.switchingTurn)
+        {
+            transform.position = Vector3.MoveTowards(transform.position,
+                             movePoint.position, moveSpeed * Time.deltaTime);
+        }
+
+        else if (turnManager.playerTurn)
         {
             PlayerMovement();
             if (!isMovingThisTurn)
             {
-                AttackAction();
                 StanceChangeAction();
             }
         }
@@ -60,7 +67,19 @@ public class PlayerController : MonoBehaviour
 
         if (Vector3.Distance(transform.position, movePoint.position) <= 0.05f)
         {
-            if (Mathf.Abs(movement.x) == 1f && !Physics2D.OverlapCircle(movePoint.position
+            if (Mathf.Abs(movement.x) == 1f && Physics2D.OverlapCircle(movePoint.position
+                + new Vector3(movement.x, 0, 0), 0.1f, enemyLayer) && turnSteps != 3)
+            {
+                AttackAction(new Vector3(movement.x, 0, 0));
+            }
+
+            else if (Mathf.Abs(movement.y) == 1f && Physics2D.OverlapCircle(movePoint.position
+                     + new Vector3(0, movement.y, 0), 0.1f, enemyLayer) && turnSteps != 3)
+            {
+                AttackAction(new Vector3(0, movement.y, 0));
+            }
+
+            else if (Mathf.Abs(movement.x) == 1f && !Physics2D.OverlapCircle(movePoint.position
                                 + new Vector3(movement.x, 0, 0), 0.1f, whatStopsMovement))
             {
                 movePoint.position += new Vector3(movement.x, 0, 0);
@@ -80,20 +99,24 @@ public class PlayerController : MonoBehaviour
 
     private void MoveAction()
     {
-        if (turnSteps % 2 == 1)
+        if (turnSteps % stepsPerTurn == 0)
         {
-            isMovingThisTurn = true;
-        }
-        else if (turnSteps % 2 == 0)
-        {
-            turnManager.playerMoves--;
             isMovingThisTurn = false;
+            turnManager.playerMoves--;
         }
+        else { isMovingThisTurn = true; }
     }
 
-    private void AttackAction()
+    // Doesn't work ???
+    private void AttackAction(Vector3 movement)
     {
-
+        Debug.Log("Attack enemy!");
+        Collider2D enemyCol = Physics2D.OverlapCircle(movePoint.position
+                                + movement, 0.1f, enemyLayer);
+        GameObject enemyObj = enemyCol.gameObject; 
+        Enemy enemy = enemyObj.GetComponent<Enemy>();
+        Destroy(enemyObj);
+        turnManager.playerMoves--;
     }
 
     private void StanceChangeAction()

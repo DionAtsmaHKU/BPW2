@@ -15,54 +15,29 @@ public class TurnManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
-        if (cameraController.isSwitchingScene())
-        {
-            roomEnemies.Clear();
-        } */
-
+        // For Start and End room
         if (roomEnemies.Count == 0)
         {
-            switchingTurn = true;
             playerTurn = true;
-            playerMoves = 100000000;
-            return;
-        }
-
-        if (!switchingTurn && playerTurn)
-        {
-            if (playerMoves == 0)
-            {
-                switchingTurn = true;
-                playerTurn = false;
-            }
-        }
-
-        if (!switchingTurn && !playerTurn)
-        {
-            if (enemyMoves == 0)
-            {
-                switchingTurn = true;
-                playerTurn = true;
-            }
-        }
-
-        if (switchingTurn && playerTurn) 
-        {
-            switchingTurn = false;
+            playerMoves = 2;
             playerController.turnSteps = 0;
-            PlayerTurn();
-        }
-
-        if (switchingTurn && !playerTurn)
+            return;
+        } 
+ 
+        // Transition turn
+        if (!switchingTurn && playerTurn && playerMoves <= 0)
         {
-            switchingTurn = false;
-            EnemyTurn();
+            StartCoroutine(TurnSwitchCooldown());
+        }
+        else if (!switchingTurn && !playerTurn && enemyMoves <= 0)
+        {
+            StartCoroutine(TurnSwitchCooldown());
         }
     }
 
     private void PlayerTurn()
     {
+        playerController.turnSteps = 0;
         playerMoves = 2;
     }
 
@@ -72,6 +47,24 @@ public class TurnManager : MonoBehaviour
         foreach (Enemy enemy in roomEnemies)
         {
             enemy.EnemyTurn();
+        }
+    }
+
+    // Swap turn (in 1 second)
+    public IEnumerator TurnSwitchCooldown()
+    {
+        switchingTurn = true;
+        yield return new WaitForSeconds(1);
+        playerTurn = !playerTurn;
+        switchingTurn = false;
+
+        if (playerTurn)
+        { 
+            PlayerTurn();
+        } 
+        else
+        {
+            EnemyTurn();
         }
     }
 }
