@@ -17,7 +17,8 @@ public class Enemy : MonoBehaviour
     private Transform playerTransform;
 
     private bool enemyActivated = false;
-    private bool desynced = false;
+    // private bool desynced = false;
+    public int hp = 10;
     // private float moveSpeed = 5f;
 
     // Start is called before the first frame update
@@ -34,6 +35,12 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (hp <= 0)
+        {
+            turnManager.roomEnemies.Remove(this);
+            Destroy(gameObject);
+        }
+
         if (cameraController.currentRoom != homeRoom)
         {
             enemyActivated = false;
@@ -61,7 +68,7 @@ public class Enemy : MonoBehaviour
 
     public void EnemyTurn()
     {
-        desynced = false;
+        // desynced = false;
         StartCoroutine(DesyncEnemyTurns());
 
         /*
@@ -135,7 +142,7 @@ public class Enemy : MonoBehaviour
     IEnumerator DesyncEnemyTurns()
     {
         yield return new WaitForSeconds(Random.Range(0, 2.0f));
-        desynced = true;
+        // desynced = true;
 
         Debug.Log("Enemy Turn!");
         Vector2 relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() -
@@ -144,6 +151,7 @@ public class Enemy : MonoBehaviour
         {
             // Attack player, 
             Debug.Log("Enemy Attacks!");
+            playerController.EnemyAttack();
             turnManager.enemyMoves--;
         }
         else

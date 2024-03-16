@@ -1305,6 +1305,9 @@ MonoBehaviour:
   moveSpeed: 5
   turnSteps: 0
   isMovingThisTurn: 0
+  hp: 20
+  attack: 18
+  defense: 18
 --- !u!61 &2014186943
 BoxCollider2D:
   m_ObjectHideFlags: 0

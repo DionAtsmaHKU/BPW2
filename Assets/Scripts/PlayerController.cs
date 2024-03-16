@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using System;
+using static UnityEngine.EventSystems.EventTrigger;
 
 public class PlayerController : MonoBehaviour
 {
@@ -15,12 +16,18 @@ public class PlayerController : MonoBehaviour
     public bool isMovingThisTurn;
     private int stepsPerTurn = 2;
 
+    public int hp = 20;
+    public int attack = 18;
+    public int defense = 18;
+
     // Action Test to get to GameOver
     public static event Action onPlayerDeath;
+    public static event Action onPlayerHit;
 
     private void OnEnable()
     {
         onPlayerDeath += PlayerExpand;
+        onPlayerHit += PlayerDamage;
     }
 
     // Start is called before the first frame update
@@ -107,7 +114,7 @@ public class PlayerController : MonoBehaviour
         else { isMovingThisTurn = true; }
     }
 
-    // Doesn't work ???
+    // attack
     private void AttackAction(Vector3 movement)
     {
         Debug.Log("Attack enemy!");
@@ -115,7 +122,15 @@ public class PlayerController : MonoBehaviour
                                 + movement, 0.1f, enemyLayer);
         GameObject enemyObj = enemyCol.gameObject; 
         Enemy enemy = enemyObj.GetComponent<Enemy>();
-        Destroy(enemyObj);
+
+        int attackRoll = UnityEngine.Random.Range(0, 20);
+        if (attackRoll <= attack)
+        {
+            Debug.Log("hit!");
+            Destroy(enemyObj);
+            // enemy.hp -= 10;
+        } else { Debug.Log("miss :("); }
+
         turnManager.playerMoves--;
     }
 
@@ -124,8 +139,28 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    public void EnemyAttack()
+    {
+        int attackRoll = UnityEngine.Random.Range(0, 20);
+        if (attackRoll >= defense)
+        {
+            Debug.Log("enemy hit!");
+            onPlayerHit.Invoke();
+        }
+        else { Debug.Log("miss :("); }
+    }
+
     void PlayerExpand()
     {
         transform.localScale *= 2;
+    }
+
+    void PlayerDamage()
+    {
+        hp -= 10;
+        if (hp <= 0)
+        {
+            onPlayerDeath.Invoke();
+        }
     }
 }
