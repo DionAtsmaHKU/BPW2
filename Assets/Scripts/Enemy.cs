@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Unity.VisualScripting;
@@ -21,6 +22,16 @@ public class Enemy : MonoBehaviour
     public int hp = 10;
     // private float moveSpeed = 5f;
 
+    /*
+    public static Action onEnemyDeath;
+
+    private void OnEnable()
+    {
+        onEnemyDeath += EnemyDies;
+    }
+
+    */ 
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,11 +46,14 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         if (hp <= 0)
         {
+            Debug.Log("enemy dies !!!");
             turnManager.roomEnemies.Remove(this);
             Destroy(gameObject);
         }
+        
 
         if (cameraController.currentRoom != homeRoom)
         {
@@ -141,7 +155,7 @@ public class Enemy : MonoBehaviour
 
     IEnumerator DesyncEnemyTurns()
     {
-        yield return new WaitForSeconds(Random.Range(0, 2.0f));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0, 2.0f));
         // desynced = true;
 
         Debug.Log("Enemy Turn!");
@@ -163,6 +177,12 @@ public class Enemy : MonoBehaviour
     }
 
     /*
+    private void EnemyDies()
+    {
+        turnManager.roomEnemies.Remove(this);
+        Destroy(gameObject);
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

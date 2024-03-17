@@ -75,13 +75,13 @@ public class PlayerController : MonoBehaviour
         if (Vector3.Distance(transform.position, movePoint.position) <= 0.05f)
         {
             if (Mathf.Abs(movement.x) == 1f && Physics2D.OverlapCircle(movePoint.position
-                + new Vector3(movement.x, 0, 0), 0.1f, enemyLayer) && turnSteps != 3)
+                + new Vector3(movement.x, 0, 0), 0.1f, enemyLayer))
             {
                 AttackAction(new Vector3(movement.x, 0, 0));
             }
 
             else if (Mathf.Abs(movement.y) == 1f && Physics2D.OverlapCircle(movePoint.position
-                     + new Vector3(0, movement.y, 0), 0.1f, enemyLayer) && turnSteps != 3)
+                     + new Vector3(0, movement.y, 0), 0.1f, enemyLayer))
             {
                 AttackAction(new Vector3(0, movement.y, 0));
             }
@@ -120,15 +120,16 @@ public class PlayerController : MonoBehaviour
         Debug.Log("Attack enemy!");
         Collider2D enemyCol = Physics2D.OverlapCircle(movePoint.position
                                 + movement, 0.1f, enemyLayer);
-        GameObject enemyObj = enemyCol.gameObject; 
-        Enemy enemy = enemyObj.GetComponent<Enemy>();
+        // GameObject enemyObj = enemyCol.gameObject; 
+        Enemy enemy = enemyCol.GetComponentInParent<Enemy>();
 
         int attackRoll = UnityEngine.Random.Range(0, 20);
         if (attackRoll <= attack)
         {
             Debug.Log("hit!");
-            Destroy(enemyObj);
-            // enemy.hp -= 10;
+            // Destroy(enemyObj);
+            enemy.hp -= 10;
+            // .onEnemyDeath.Invoke();
         } else { Debug.Log("miss :("); }
 
         turnManager.playerMoves--;
