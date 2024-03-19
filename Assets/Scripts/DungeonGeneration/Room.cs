@@ -146,7 +146,7 @@ public class Room : MonoBehaviour
 
     public HashSet<Vector2Int> PlaceFloor()
     {
-        if (name.Contains("Start") || name.Contains("End")) {
+        if (name.Contains("Start") || name.Contains("End") || name.Contains("Tutorial")) {
             return null;
         }
         Debug.Log(new Vector4(x, y, width, height));

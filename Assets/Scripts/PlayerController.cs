@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using System;
 using static UnityEngine.EventSystems.EventTrigger;
+using UnityEditor.Experimental.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,8 +18,10 @@ public class PlayerController : MonoBehaviour
     private int stepsPerTurn = 2;
 
     public int hp = 20;
-    public int attack = 18;
-    public int defense = 18;
+    public int attack = 14;
+    public int defense = 8;
+
+    public bool attackStance = true;
 
     // Action Test to get to GameOver
     public static event Action onPlayerDeath;
@@ -124,7 +127,7 @@ public class PlayerController : MonoBehaviour
         Enemy enemy = enemyCol.GetComponentInParent<Enemy>();
 
         int attackRoll = UnityEngine.Random.Range(0, 20);
-        if (attackRoll <= attack)
+        if (attackRoll + enemy.enemyDef <= attack)
         {
             Debug.Log("hit!");
             // Destroy(enemyObj);
@@ -137,13 +140,28 @@ public class PlayerController : MonoBehaviour
 
     private void StanceChangeAction()
     {
-
+        if (Input.GetKeyDown(KeyCode.Space)) {
+            if (attackStance)
+            {
+                attack -= 6;
+                defense += 6;
+                attackStance = false;
+            }
+            else
+            {
+                attack += 6;
+                defense -= 6;
+                attackStance = true;
+            }
+            turnManager.playerMoves--;
+            // Do Cool Effect
+        }
     }
 
-    public void EnemyAttack()
+    public void EnemyAttack(int enemyAtt)
     {
         int attackRoll = UnityEngine.Random.Range(0, 20);
-        if (attackRoll >= defense)
+        if (attackRoll + enemyAtt >= defense)
         {
             Debug.Log("enemy hit!");
             onPlayerHit.Invoke();

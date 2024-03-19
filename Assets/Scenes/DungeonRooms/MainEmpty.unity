@@ -1684,6 +1684,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3fabea4053b577c4c8c1caf3d66b27e7, type: 2}
   - {fileID: 11400000, guid: 286378efa3c11af489d59859461ae7fc, type: 2}
   - {fileID: 11400000, guid: b0343acc7bfa1c54abd136f30d016943, type: 2}
+  - {fileID: 11400000, guid: 398f22c6b9079684cb85a5c7e441558b, type: 2}
   cornerPropPlacementChance: 0.5
   propPrefab: {fileID: 5333753092155400382, guid: 37ab54b703c234f408f8375609821831, type: 3}
   enemyPrefab: {fileID: 6272595230693292800, guid: e4371910790cdb541aa0aa20caca3b02, type: 3}

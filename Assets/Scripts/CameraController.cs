@@ -33,7 +33,11 @@ public class CameraController : MonoBehaviour
     // Returns the new target position of the camera as a Vector3
     private Vector3 GetCamTargetPos()
     {
-        if (currentRoom == null) { return Vector3.zero;}
+        if (currentRoom == null) 
+        {
+            // return Vector3.zero;
+            return new Vector3(250, 160);
+        }
 
         Vector2Int targetPos = currentRoom.GetRoomCentre();
         return new Vector3(targetPos.x + 1, targetPos.y + 1, -10);

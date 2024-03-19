@@ -9,6 +9,7 @@ public class Prop : ScriptableObject
     public Sprite propSprite;
     public Vector2Int propSize = Vector2Int.one;
     public bool isEnemy = false;
+    public bool isBigEnemy = false;
 
     [Space, Header("Placement type:")]
     public bool corner = true;

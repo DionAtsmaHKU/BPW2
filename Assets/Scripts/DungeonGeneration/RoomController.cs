@@ -117,13 +117,7 @@ public class RoomController : MonoBehaviour
             {
                 foreach (Room room in loadedRooms)
                 {
-                    //if (!name.Contains("End") && !name.Contains("Start"))
-                    //{
-                    //    room.PlaceFloor();
-                    //    RoomDataExtractor roomDataExtractor = room.GetComponent<RoomDataExtractor>();
-                    //   roomDataExtractor.ProcessRooms();
-                    //}
-                    room.PlaceFloor();                
+                    room.PlaceFloor();
                     room.RemoveUnconnectedDoors();
                     room.ProcessRooms();
                 }
@@ -149,18 +143,17 @@ public class RoomController : MonoBehaviour
         {
             Room bossRoom = loadedRooms[loadedRooms.Count - 1];
             Room tempRoom = new Room(bossRoom.x, bossRoom.y);
-            // tempRoom.name = "Temp";
+
             Destroy(bossRoom.gameObject);
             var roomToRemove = loadedRooms.Single(r => r.x == tempRoom.x && r.y == tempRoom.y);
             loadedRooms.Remove(roomToRemove);
             LoadRoom("End", tempRoom.x, tempRoom.y);
-            
-            /*
-            foreach (Room room in loadedRooms)
+
+            // Remove placed props
+            foreach (GameObject prop in bossRoom.roomData.PropObjectRefrences)
             {
-                room.RemoveUnconnectedDoors();
+                Destroy(prop);
             }
-            */
         }
     }
 

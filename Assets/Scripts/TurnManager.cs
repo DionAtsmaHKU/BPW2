@@ -41,12 +41,13 @@ public class TurnManager : MonoBehaviour
         playerMoves = 2;
     }
 
-    private void EnemyTurn()
+    private IEnumerator EnemyTurn()
     {
         enemyMoves = roomEnemies.Count;
         foreach (Enemy enemy in roomEnemies)
         {
             enemy.EnemyTurn();
+            yield return new WaitForSeconds(0.25f);
         }
     }
 
@@ -64,7 +65,7 @@ public class TurnManager : MonoBehaviour
         } 
         else
         {
-            EnemyTurn();
+            StartCoroutine(EnemyTurn());
         }
     }
 }

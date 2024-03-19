@@ -32,7 +32,18 @@ public class PropPlacementManager : MonoBehaviour
 
     public void ProcessRoom()
     {
-        if (roomData == null || name.Contains("Start") || name == null)
+        /*
+        // Places tutorial enemy
+        if (name.Contains("Tutorial"))
+        {
+            List<Prop> tutorialProps = propsToPlace.Where(x => x.isBigEnemy).ToList();
+
+            PlacePropGameObjectAt(new Vector2Int(250, 150), tutorialProps[0]);
+            return;
+        }
+        */
+
+        if (roomData == null || name.Contains("Start") || name.Contains("Tutorial") || name == null)
             return;
         
         // Place props in corners
@@ -215,6 +226,13 @@ public class PropPlacementManager : MonoBehaviour
             prop.AddComponent<Enemy>();
             Enemy enemyScript = prop.GetComponent<Enemy>();
             enemyScript.homeRoom = room;
+
+            if (propToPlace.isBigEnemy)
+            {
+                enemyScript.hp = 30;
+                enemyScript.enemyAtt = 0;
+                enemyScript.enemyDef = -2;
+            }
         } else { prop = Instantiate(propPrefab); }
 
         SpriteRenderer propSpriteRenderer = prop.GetComponentInChildren<SpriteRenderer>();

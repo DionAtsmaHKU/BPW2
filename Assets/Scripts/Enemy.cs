@@ -20,6 +20,8 @@ public class Enemy : MonoBehaviour
     private bool enemyActivated = false;
     // private bool desynced = false;
     public int hp = 10;
+    public int enemyAtt = 2;
+    public int enemyDef = 2;
     // private float moveSpeed = 5f;
 
     /*
@@ -83,9 +85,9 @@ public class Enemy : MonoBehaviour
     public void EnemyTurn()
     {
         // desynced = false;
-        StartCoroutine(DesyncEnemyTurns());
+        // StartCoroutine(DesyncEnemyTurns());
 
-        /*
+        
         Debug.Log("Enemy Turn!");
         Vector2 relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() - 
             (Vector2)playerTransform.position + new Vector2(2, 2);
@@ -93,6 +95,7 @@ public class Enemy : MonoBehaviour
         {
             // Attack player, 
             Debug.Log("Enemy Attacks!");
+            playerController.EnemyAttack(enemyAtt);
             turnManager.enemyMoves--;
         }
         else
@@ -101,7 +104,7 @@ public class Enemy : MonoBehaviour
             MoveTowardsPlayer(relativePos);
             turnManager.enemyMoves--;
         }
-        */
+        
     }
 
     private void MoveTowardsPlayer(Vector2 relativePos)
@@ -153,11 +156,8 @@ public class Enemy : MonoBehaviour
         */
     }
 
-    IEnumerator DesyncEnemyTurns()
-    {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0, 2.0f));
-        // desynced = true;
-
+    /*
+    public void DesyncEnemyTurns()
         Debug.Log("Enemy Turn!");
         Vector2 relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() -
             (Vector2)playerTransform.position + new Vector2(2, 2);
@@ -175,6 +175,7 @@ public class Enemy : MonoBehaviour
             turnManager.enemyMoves--;
         }
     }
+    */
 
     /*
     private void EnemyDies()
