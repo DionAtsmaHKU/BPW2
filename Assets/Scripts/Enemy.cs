@@ -24,19 +24,15 @@ public class Enemy : MonoBehaviour
     public int enemyDef = 2;
     // private float moveSpeed = 5f;
 
-    /*
-    public static Action onEnemyDeath;
-
-    private void OnEnable()
-    {
-        onEnemyDeath += EnemyDies;
-    }
-
-    */ 
-
     // Start is called before the first frame update
     void Start()
     {
+        if (tag == "TutorialEnemy")
+        {
+            Debug.Log("TUtorial awenmy");
+            GameManager.onTutorialStart += AddTutorialEnemy;
+        }
+
         cameraController = FindAnyObjectByType<CameraController>();
         turnManager = FindAnyObjectByType<TurnManager>();
 
@@ -52,6 +48,12 @@ public class Enemy : MonoBehaviour
         if (hp <= 0)
         {
             Debug.Log("enemy dies !!!");
+
+            if (tag == "TutorialEnemy")
+            {
+                cameraController.currentRoom.tutWall.SetActive(false);
+            }
+
             turnManager.roomEnemies.Remove(this);
             Destroy(gameObject);
         }
@@ -84,13 +86,21 @@ public class Enemy : MonoBehaviour
 
     public void EnemyTurn()
     {
-        // desynced = false;
-        // StartCoroutine(DesyncEnemyTurns());
+        Debug.Log("Enemy Turn!");
+        Vector2 relativePos;
+
+        if (homeRoom == RoomController.instance.loadedRooms[1])
+        {
+            relativePos = (Vector2)transform.position - (Vector2)playerTransform.position;
+        } 
+        else
+        {
+            relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() -
+                          (Vector2)playerTransform.position + new Vector2(2, 2);
+        }
 
         
-        Debug.Log("Enemy Turn!");
-        Vector2 relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() - 
-            (Vector2)playerTransform.position + new Vector2(2, 2);
+
         if (relativePos.magnitude <= 1.1) // player in range
         {
             // Attack player, 
@@ -190,4 +200,10 @@ public class Enemy : MonoBehaviour
         Gizmos.DrawSphere((Vector2)transform.position + cameraController.currentRoom.GetRoomCentre(), 0.1f); ;
     }
     */
+
+    public void AddTutorialEnemy()
+    {
+        turnManager.roomEnemies.Add(this);
+        Debug.Log("adding enemy now");
+    }
 }

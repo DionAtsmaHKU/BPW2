@@ -18,7 +18,7 @@ public class PropPlacementManager : MonoBehaviour
     private float cornerPropPlacementChance = 0.5f;
 
     [SerializeField]
-    private GameObject propPrefab, enemyPrefab;
+    private GameObject propPrefab, enemyPrefab, tutorialEnemyPrefab;
 
     private void OnEnable()
     {
@@ -32,18 +32,19 @@ public class PropPlacementManager : MonoBehaviour
 
     public void ProcessRoom()
     {
-        /*
+        Debug.Log("Processing room");
         // Places tutorial enemy
-        if (name.Contains("Tutorial"))
+        if (room.name.Contains("Tutorial"))
         {
-            List<Prop> tutorialProps = propsToPlace.Where(x => x.isBigEnemy).ToList();
-
-            PlacePropGameObjectAt(new Vector2Int(250, 150), tutorialProps[0]);
+            Debug.Log("Placing tutorial enemy");
+            GameObject enemy = Instantiate(tutorialEnemyPrefab);
+            room.roomData.EnemiesInRoom.Add(enemy);
+            Enemy enemyScript = enemy.GetComponent<Enemy>();
+            enemyScript.homeRoom = room;
             return;
         }
-        */
 
-        if (roomData == null || name.Contains("Start") || name.Contains("Tutorial") || name == null)
+        if (roomData == null || room.name.Contains("Start") || room.name.Contains("Tutorial") || room.name == null)
             return;
         
         // Place props in corners

@@ -232,6 +232,10 @@ public class RoomController : MonoBehaviour
     // Sets the current room for the cameracontroller to the room the player is entering
     public void OnPlayerEnterRoom(Room room)
     {
+        if (room != loadedRooms[1])
+        {
+            // turnManager.roomEnemies.Clear();
+        }
         turnManager.roomEnemies.Clear();
         CameraController.instance.currentRoom = room;
         currentRoom = room;

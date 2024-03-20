@@ -28,6 +28,8 @@ public class Room : MonoBehaviour
     public int y;
     public Vector2Int worldOrigin;
 
+    public GameObject tutWall;
+
     [SerializeField] private Tilemap floorMap, colliderMap;
     [SerializeField] private TileBase floorTile, pathTile;
 

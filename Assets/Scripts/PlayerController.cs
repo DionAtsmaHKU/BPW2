@@ -8,7 +8,7 @@ using UnityEditor.Experimental.GraphView;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] Transform movePoint;
+    public Transform movePoint;
     public LayerMask whatStopsMovement;
     public LayerMask enemyLayer;
     private TurnManager turnManager;
@@ -180,6 +180,16 @@ public class PlayerController : MonoBehaviour
         if (hp <= 0)
         {
             onPlayerDeath.Invoke();
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Warp"))
+        {
+            transform.position = Vector3.zero;
+            movePoint.transform.position = Vector3.zero;
+            // RoomController.instance.OnPlayerEnterRoom(RoomController.instance.loadedRooms[0]);
         }
     }
 }
