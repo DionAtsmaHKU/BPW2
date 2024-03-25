@@ -445,10 +445,17 @@ MonoBehaviour:
   x: 0
   y: 0
   worldOrigin: {x: 0, y: 0}
+  tutWall: {fileID: 0}
   floorMap: {fileID: 231820699}
   colliderMap: {fileID: 869860621}
-  floorTile: {fileID: 11400000, guid: 2ea5d243e7eca764391569c797535178, type: 2}
-  pathTile: {fileID: 11400000, guid: 181f8c3e84e301f43976e38347428f13, type: 2}
+  pathTile:
+  - {fileID: 11400000, guid: 28171b0a2abd39f4ea595bbadbc208fe, type: 2}
+  - {fileID: 11400000, guid: 181f8c3e84e301f43976e38347428f13, type: 2}
+  - {fileID: 11400000, guid: a90b8b66f377d544c9d889cde00d961a, type: 2}
+  floorTile:
+  - {fileID: 11400000, guid: aa602f9aa594e02429f73dc05a3613b8, type: 2}
+  - {fileID: 11400000, guid: 24c4583dad94df44c95509180c706d31, type: 2}
+  - {fileID: 11400000, guid: 2ea5d243e7eca764391569c797535178, type: 2}
   roomDataExtractor: {fileID: 302612846}
   leftDoor: {fileID: 0}
   rightDoor: {fileID: 0}
@@ -1688,6 +1695,7 @@ MonoBehaviour:
   cornerPropPlacementChance: 0.5
   propPrefab: {fileID: 5333753092155400382, guid: 37ab54b703c234f408f8375609821831, type: 3}
   enemyPrefab: {fileID: 6272595230693292800, guid: e4371910790cdb541aa0aa20caca3b02, type: 3}
+  tutorialEnemyPrefab: {fileID: 0}
 --- !u!4 &1025001205
 Transform:
   m_ObjectHideFlags: 0

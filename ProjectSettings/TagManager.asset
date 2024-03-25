@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Warp
   - TutorialEnemy
+  - Win
   layers:
   - Default
   - TransparentFX

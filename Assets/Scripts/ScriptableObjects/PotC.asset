@@ -14,14 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   propSprite: {fileID: 105163547, guid: b85bdb1e782899647a1aab1dfe435966, type: 3}
   propSize: {x: 1, y: 1}
+  isEnemy: 0
+  isBigEnemy: 0
   corner: 0
   nearwallUp: 0
   nearwallDown: 0
   nearwallRight: 0
   nearwallLeft: 0
   inner: 1
-  quantityMin: 1
+  quantityMin: 0
   quantityMax: 3
-  placeAsGroup: 0
-  minGroupCount: 1
-  maxGroupCount: 1

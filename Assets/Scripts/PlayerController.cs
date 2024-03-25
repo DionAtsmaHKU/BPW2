@@ -5,12 +5,17 @@ using UnityEngine;
 using System;
 using static UnityEngine.EventSystems.EventTrigger;
 using UnityEditor.Experimental.GraphView;
+using Unity.Burst.CompilerServices;
 
 public class PlayerController : MonoBehaviour
 {
+    [SerializeField] GameObject damagePopUp;
+    [SerializeField] Transform canvasTransform;
+
     public Transform movePoint;
     public LayerMask whatStopsMovement;
     public LayerMask enemyLayer;
+    private CameraController cam;
     private TurnManager turnManager;
     public float moveSpeed = 5f;
     public int turnSteps;
@@ -31,15 +36,17 @@ public class PlayerController : MonoBehaviour
     {
         onPlayerDeath += PlayerExpand;
         onPlayerHit += PlayerDamage;
+        // Disowns the movePoint (I can have one joke in here right)
+        movePoint.parent = null;
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        cam = FindAnyObjectByType<CameraController>();
         turnManager = FindAnyObjectByType<TurnManager>();
 
-        // Disowns the movePoint (I can have one joke in here right)
-        movePoint.parent = null;
+        
     }
 
     // Update is called once per frame
@@ -120,7 +127,7 @@ public class PlayerController : MonoBehaviour
     // attack
     private void AttackAction(Vector3 movement)
     {
-        Debug.Log("Attack enemy!");
+        // Debug.Log("Attack enemy!");
         Collider2D enemyCol = Physics2D.OverlapCircle(movePoint.position
                                 + movement, 0.1f, enemyLayer);
         // GameObject enemyObj = enemyCol.gameObject; 
@@ -129,13 +136,21 @@ public class PlayerController : MonoBehaviour
         int attackRoll = UnityEngine.Random.Range(0, 20);
         if (attackRoll + enemy.enemyDef <= attack)
         {
-            Debug.Log("hit!");
-            // Destroy(enemyObj);
+            // Debug.Log("hit!");
             enemy.hp -= 10;
-            // .onEnemyDeath.Invoke();
-        } else { Debug.Log("miss :("); }
-
-        turnManager.playerMoves--;
+            SpawnPopUp(true, 10);
+            turnManager.playerMoves--;
+            // PLAY SOUND
+            return;
+        }
+        else 
+        { 
+            // Debug.Log("miss :(");
+            SpawnPopUp(false, 0);
+            turnManager.playerMoves--;
+            // PLAY SOUND
+        }
+        
     }
 
     private void StanceChangeAction()
@@ -163,10 +178,17 @@ public class PlayerController : MonoBehaviour
         int attackRoll = UnityEngine.Random.Range(0, 20);
         if (attackRoll + enemyAtt >= defense)
         {
-            Debug.Log("enemy hit!");
+            // Debug.Log("enemy hit!");
             onPlayerHit.Invoke();
+            SpawnPopUp(true, 10);
+            // PLAY SOUND
         }
-        else { Debug.Log("miss :("); }
+        else 
+        { 
+            // Debug.Log("miss :("); 
+            SpawnPopUp(false, 0);
+            // PLAY SOUND
+        }
     }
 
     void PlayerExpand()
@@ -189,7 +211,33 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = Vector3.zero;
             movePoint.transform.position = Vector3.zero;
-            // RoomController.instance.OnPlayerEnterRoom(RoomController.instance.loadedRooms[0]);
+            // PLAY SOUND
+            StartCoroutine(SetCamSpeed());
         }
+        else if (collision.CompareTag("Win"))
+        {
+            GameManager.Instance.WinGame();
+        }
+    }
+
+    IEnumerator SetCamSpeed()
+    {
+        yield return new WaitForSeconds(1);
+        cam.moveSpeed = 25;
+    }
+
+    private void SpawnPopUp(bool hit, int damage)
+    {
+        DamagePopUp textToSpawn = Instantiate(damagePopUp, canvasTransform).GetComponent<DamagePopUp>();
+        string textToDisplay;
+        if (hit)
+        {
+            textToDisplay = "-" + damage.ToString() + " hp";
+        }
+        else
+        {
+            textToDisplay = "Miss...";
+        }
+        textToSpawn.DisplayText(textToDisplay);
     }
 }

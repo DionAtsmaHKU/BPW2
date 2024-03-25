@@ -9,7 +9,6 @@ public class CameraController : MonoBehaviour
     public Room currentRoom;
     public float moveSpeed;
 
-
     private void Awake()
     {
         instance = this;

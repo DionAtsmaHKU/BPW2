@@ -31,7 +31,8 @@ public class Room : MonoBehaviour
     public GameObject tutWall;
 
     [SerializeField] private Tilemap floorMap, colliderMap;
-    [SerializeField] private TileBase floorTile, pathTile;
+    [SerializeField] private TileBase[] pathTile;
+    [SerializeField] private TileBase[] floorTile;
 
     public RoomDataExtractor roomDataExtractor;
     public RoomData roomData;
@@ -151,7 +152,7 @@ public class Room : MonoBehaviour
         if (name.Contains("Start") || name.Contains("End") || name.Contains("Tutorial")) {
             return null;
         }
-        Debug.Log(new Vector4(x, y, width, height));
+        // Debug.Log(new Vector4(x, y, width, height));
         // Vector2Int roomCentre = GetRoomCentre()/2;
         Vector2Int roomCentre = GetRoomCentre();
         // Vector2Int roomCentre = worldOrigin;
@@ -179,7 +180,8 @@ public class Room : MonoBehaviour
                 Vector3Int positionInt = floorMap.WorldToCell(position);
                 // Vector3Int positionInt = new Vector3Int(position.x, position.y);
                 roomData.Floor.Add((Vector2Int)positionInt);
-                floorMap.SetTile(positionInt, floorTile);
+                floorMap.SetTile(positionInt, floorTile[Random.Range(0, 3)]);
+                // instead: random floortile
             }
         }
 
@@ -196,8 +198,8 @@ public class Room : MonoBehaviour
 
         // Create a hashset and add start and end positions to it
         HashSet<Vector2Int> pathTiles = new() { startPos, endPos };
-        floorMap.SetTile((Vector3Int)startPos, pathTile);
-        floorMap.SetTile((Vector3Int)endPos, pathTile);
+        floorMap.SetTile((Vector3Int)startPos, pathTile[Random.Range(0, 3)]);
+        floorMap.SetTile((Vector3Int)endPos, pathTile[Random.Range(0, 3)]);
 
         // Find direction of the path
         Vector2Int direction = Vector2Int.CeilToInt(((Vector2)endPos - startPos).normalized);
@@ -210,7 +212,7 @@ public class Room : MonoBehaviour
             pathTiles.Add(currentPos);
             // Debug.Log("Placing at: " + currentPos);
             floorMap.SetTile((Vector3Int)currentPos, null);
-            floorMap.SetTile((Vector3Int)currentPos, pathTile);
+            floorMap.SetTile((Vector3Int)currentPos, pathTile[Random.Range(0, 3)]);
         }
 
         return pathTiles;

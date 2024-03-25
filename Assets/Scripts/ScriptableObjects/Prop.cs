@@ -18,7 +18,7 @@ public class Prop : ScriptableObject
     public bool nearwallRight = true;
     public bool nearwallLeft = true;
     public bool inner = true;
-    [Min(1)]
+    [Min(0)]
     public int quantityMin = 1;
     [Min(1)]
     public int quantityMax = 1;

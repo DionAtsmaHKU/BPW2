@@ -32,11 +32,13 @@ public class PropPlacementManager : MonoBehaviour
 
     public void ProcessRoom()
     {
-        Debug.Log("Processing room");
+        if (room == null || roomData == null || room.name.Contains("Start"))
+            return;
+
         // Places tutorial enemy
-        if (room.name.Contains("Tutorial"))
+        if (room != null && room.name.Contains("Tutorial"))
         {
-            Debug.Log("Placing tutorial enemy");
+            // Debug.Log("Placing tutorial enemy");
             GameObject enemy = Instantiate(tutorialEnemyPrefab);
             room.roomData.EnemiesInRoom.Add(enemy);
             Enemy enemyScript = enemy.GetComponent<Enemy>();
@@ -44,8 +46,7 @@ public class PropPlacementManager : MonoBehaviour
             return;
         }
 
-        if (roomData == null || room.name.Contains("Start") || room.name.Contains("Tutorial") || room.name == null)
-            return;
+
         
         // Place props in corners
         List<Prop> cornerProps = propsToPlace.Where(x => x.corner).ToList();

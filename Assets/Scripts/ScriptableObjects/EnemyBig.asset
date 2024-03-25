@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyBig
   m_EditorClassIdentifier: 
   propSprite: {fileID: -527340448, guid: b85bdb1e782899647a1aab1dfe435966, type: 3}
-  propSize: {x: 2, y: 2}
+  propSize: {x: 1, y: 1}
   isEnemy: 1
   isBigEnemy: 1
   corner: 0
@@ -22,5 +22,5 @@ MonoBehaviour:
   nearwallRight: 0
   nearwallLeft: 0
   inner: 1
-  quantityMin: 1
+  quantityMin: 0
   quantityMax: 1

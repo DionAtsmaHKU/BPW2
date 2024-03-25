@@ -29,7 +29,7 @@ public class Enemy : MonoBehaviour
     {
         if (tag == "TutorialEnemy")
         {
-            Debug.Log("TUtorial awenmy");
+            // Debug.Log("TUtorial awenmy");
             GameManager.onTutorialStart += AddTutorialEnemy;
         }
 
@@ -47,7 +47,7 @@ public class Enemy : MonoBehaviour
         
         if (hp <= 0)
         {
-            Debug.Log("enemy dies !!!");
+            // Debug.Log("enemy dies !!!");
 
             if (tag == "TutorialEnemy")
             {
@@ -86,7 +86,7 @@ public class Enemy : MonoBehaviour
 
     public void EnemyTurn()
     {
-        Debug.Log("Enemy Turn!");
+        // Debug.Log("Enemy Turn!");
         Vector2 relativePos;
 
         if (homeRoom == RoomController.instance.loadedRooms[1])
@@ -104,7 +104,7 @@ public class Enemy : MonoBehaviour
         if (relativePos.magnitude <= 1.1) // player in range
         {
             // Attack player, 
-            Debug.Log("Enemy Attacks!");
+            // Debug.Log("Enemy Attacks!");
             playerController.EnemyAttack(enemyAtt);
             turnManager.enemyMoves--;
         }
@@ -119,7 +119,7 @@ public class Enemy : MonoBehaviour
 
     private void MoveTowardsPlayer(Vector2 relativePos)
     {
-        Debug.Log(relativePos);
+        // Debug.Log(relativePos);
         if (relativePos.x >= 0 && relativePos.x >= relativePos.y)
         {
             CheckForWalls(new Vector3(-1, 0, 0));
@@ -157,53 +157,11 @@ public class Enemy : MonoBehaviour
         {
             transform.position += targetPos;
         }
-        /*
-        if (!Physics2D.OverlapCircle(transform.position + targetPos, 0.1f, playerController.whatStopsMovement) &&
-            !Physics2D.OverlapCircle(transform.position + targetPos, 0.1f, playerController.enemyLayer))
-        {
-            transform.position += targetPos;
-        }
-        */
     }
-
-    /*
-    public void DesyncEnemyTurns()
-        Debug.Log("Enemy Turn!");
-        Vector2 relativePos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() -
-            (Vector2)playerTransform.position + new Vector2(2, 2);
-        if (relativePos.magnitude <= 1.1) // player in range
-        {
-            // Attack player, 
-            Debug.Log("Enemy Attacks!");
-            playerController.EnemyAttack();
-            turnManager.enemyMoves--;
-        }
-        else
-        {
-            // Walk towards player
-            MoveTowardsPlayer(relativePos);
-            turnManager.enemyMoves--;
-        }
-    }
-    */
-
-    /*
-    private void EnemyDies()
-    {
-        turnManager.roomEnemies.Remove(this);
-        Destroy(gameObject);
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere((Vector2)transform.position + cameraController.currentRoom.GetRoomCentre(), 0.1f); ;
-    }
-    */
 
     public void AddTutorialEnemy()
     {
         turnManager.roomEnemies.Add(this);
-        Debug.Log("adding enemy now");
+        // Debug.Log("adding enemy now");
     }
 }
