@@ -30,7 +30,6 @@ public class RoomController : MonoBehaviour
     private bool updatedRooms = false;
 
     public static event Action OnRoomGenFinished;
-    // public static event Action OnRoomsProcessed;
 
     private void Awake()
     {

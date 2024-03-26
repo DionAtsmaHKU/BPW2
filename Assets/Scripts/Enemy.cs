@@ -30,7 +30,7 @@ public class Enemy : MonoBehaviour
         if (tag == "TutorialEnemy")
         {
             // Debug.Log("TUtorial awenmy");
-            GameManager.onTutorialStart += AddTutorialEnemy;
+            GameManager.Instance.onTutorialStart += AddTutorialEnemy;
         }
 
         cameraController = FindAnyObjectByType<CameraController>();
@@ -52,6 +52,11 @@ public class Enemy : MonoBehaviour
             if (tag == "TutorialEnemy")
             {
                 cameraController.currentRoom.tutWall.SetActive(false);
+                playerController.hp = 90;
+            }
+            playerController.hp += 10;
+            if (playerController.hp > 100) {
+                playerController.hp = 100;
             }
 
             turnManager.roomEnemies.Remove(this);

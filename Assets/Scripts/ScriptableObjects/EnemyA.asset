@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3971922910277594c97029d03ee87a3d, type: 3}
   m_Name: EnemyA
   m_EditorClassIdentifier: 
-  propSprite: {fileID: -527340448, guid: b85bdb1e782899647a1aab1dfe435966, type: 3}
+  propSprite: {fileID: 260400514, guid: b0c1b295951ebc64aa82cd7e6e6c710c, type: 3}
   propSize: {x: 1, y: 1}
   isEnemy: 1
+  isBigEnemy: 0
   corner: 0
   nearwallUp: 0
   nearwallDown: 0

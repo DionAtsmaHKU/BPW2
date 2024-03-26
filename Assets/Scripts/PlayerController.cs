@@ -9,35 +9,42 @@ using Unity.Burst.CompilerServices;
 
 public class PlayerController : MonoBehaviour
 {
+    public static event Action onPlayerDeath;
+    public static event Action onPlayerHit;
+
     [SerializeField] GameObject damagePopUp;
     [SerializeField] Transform canvasTransform;
+    [SerializeField] AudioSource hitSound, missSound, warpSound;
 
     public Transform movePoint;
     public LayerMask whatStopsMovement;
     public LayerMask enemyLayer;
-    private CameraController cam;
-    private TurnManager turnManager;
+    
     public float moveSpeed = 5f;
     public int turnSteps;
     public bool isMovingThisTurn;
-    private int stepsPerTurn = 2;
-
     public int hp = 20;
+
     public int attack = 14;
     public int defense = 8;
 
     public bool attackStance = true;
 
-    // Action Test to get to GameOver
-    public static event Action onPlayerDeath;
-    public static event Action onPlayerHit;
+    private CameraController cam;
+    private TurnManager turnManager;
+    private int stepsPerTurn = 2;
+    private bool doUpdate = true;
+
 
     private void OnEnable()
     {
-        onPlayerDeath += PlayerExpand;
         onPlayerHit += PlayerDamage;
-        // Disowns the movePoint (I can have one joke in here right)
-        movePoint.parent = null;
+        movePoint.parent = null;  // Disowns the movePoint
+    }
+
+    private void OnDestroy()
+    {
+        onPlayerHit -= PlayerDamage;
     }
 
     // Start is called before the first frame update
@@ -45,31 +52,27 @@ public class PlayerController : MonoBehaviour
     {
         cam = FindAnyObjectByType<CameraController>();
         turnManager = FindAnyObjectByType<TurnManager>();
-
-        
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!doUpdate)
+        {
+            return;
+        }
+
         if (turnManager.switchingTurn)
         {
             transform.position = Vector3.MoveTowards(transform.position,
                              movePoint.position, moveSpeed * Time.deltaTime);
         }
 
+        // Possible actions on player turn
         else if (turnManager.playerTurn)
         {
             PlayerMovement();
-            if (!isMovingThisTurn)
-            {
-                StanceChangeAction();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            onPlayerDeath?.Invoke();
+            StanceChangeAction();
         }
     }
 
@@ -114,45 +117,46 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    // The player moves a tile. The player can move stepsPerTurn steps for one "playerMove".
     private void MoveAction()
     {
         if (turnSteps % stepsPerTurn == 0)
         {
-            isMovingThisTurn = false;
             turnManager.playerMoves--;
         }
         else { isMovingThisTurn = true; }
     }
 
-    // attack
+    /* The player attacks an enemy.
+     * To do this, the player rolls an attack from 0 to 20. Then, to see if the
+     * attack hits, the enemy's defense is added to the attack roll, and if this
+     * result is lower than the player's attack stat, it hits. */
     private void AttackAction(Vector3 movement)
     {
-        // Debug.Log("Attack enemy!");
         Collider2D enemyCol = Physics2D.OverlapCircle(movePoint.position
                                 + movement, 0.1f, enemyLayer);
-        // GameObject enemyObj = enemyCol.gameObject; 
         Enemy enemy = enemyCol.GetComponentInParent<Enemy>();
 
         int attackRoll = UnityEngine.Random.Range(0, 20);
         if (attackRoll + enemy.enemyDef <= attack)
         {
-            // Debug.Log("hit!");
             enemy.hp -= 10;
-            SpawnPopUp(true, 10);
+            SpawnPopUp(false, true, 10);
             turnManager.playerMoves--;
-            // PLAY SOUND
-            return;
+            StartCoroutine(WaitAfterAttack());
+            // hitSound.Play();
         }
         else 
         { 
-            // Debug.Log("miss :(");
-            SpawnPopUp(false, 0);
+            SpawnPopUp(false, false, 0);
             turnManager.playerMoves--;
-            // PLAY SOUND
+            StartCoroutine(WaitAfterAttack());
+            // missSound.Play();
         }
-        
     }
 
+    /* The player changes from attack to defending stance or vice-versa.
+     * This will give the player better attack or better defense. */
     private void StanceChangeAction()
     {
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -169,33 +173,29 @@ public class PlayerController : MonoBehaviour
                 attackStance = true;
             }
             turnManager.playerMoves--;
-            // Do Cool Effect
+            SpawnPopUp(true, false, 0);
         }
     }
 
+    // The enemy attacks the player, using the same logic from the player attack but in reverse.
     public void EnemyAttack(int enemyAtt)
     {
         int attackRoll = UnityEngine.Random.Range(0, 20);
         if (attackRoll + enemyAtt >= defense)
         {
-            // Debug.Log("enemy hit!");
             onPlayerHit.Invoke();
-            SpawnPopUp(true, 10);
-            // PLAY SOUND
+            SpawnPopUp(false, true, 10);
+            // hitSound.Play();
         }
         else 
         { 
             // Debug.Log("miss :("); 
-            SpawnPopUp(false, 0);
-            // PLAY SOUND
+            SpawnPopUp(false, false, 0);
+            // missSound.Play();
         }
     }
 
-    void PlayerExpand()
-    {
-        transform.localScale *= 2;
-    }
-
+    // The player takes damage or dies if its health reaches zero.
     void PlayerDamage()
     {
         hp -= 10;
@@ -211,13 +211,22 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = Vector3.zero;
             movePoint.transform.position = Vector3.zero;
-            // PLAY SOUND
+            // warpSound.Play();
             StartCoroutine(SetCamSpeed());
         }
         else if (collision.CompareTag("Win"))
         {
             GameManager.Instance.WinGame();
+            // warpSound.Play();
         }
+    }
+
+    // Short cooldown between the player's attacks.
+    IEnumerator WaitAfterAttack()
+    {
+        doUpdate = false;
+        yield return new WaitForSeconds(0.5f);
+        doUpdate = true;
     }
 
     IEnumerator SetCamSpeed()
@@ -226,11 +235,24 @@ public class PlayerController : MonoBehaviour
         cam.moveSpeed = 25;
     }
 
-    private void SpawnPopUp(bool hit, int damage)
+    /* Spawns a pop-up of text, either after a player hits or misses an enemy,
+     * an enemy hits or misses the player, or when the player chances stances. */
+    private void SpawnPopUp(bool stanceChange, bool hit, int damage)
     {
+        Vector3 randomOffset = new Vector3(UnityEngine.Random.Range(20, 40),
+            UnityEngine.Random.Range(20, 40), 1);
         DamagePopUp textToSpawn = Instantiate(damagePopUp, canvasTransform).GetComponent<DamagePopUp>();
         string textToDisplay;
-        if (hit)
+        textToSpawn.transform.position += randomOffset;
+        if (stanceChange)
+        {
+            if (attackStance)
+            {
+                textToDisplay = "Attacking!";
+            }
+            else { textToDisplay = "Defending!"; }
+        }
+        else if (hit)
         {
             textToDisplay = "-" + damage.ToString() + " hp";
         }

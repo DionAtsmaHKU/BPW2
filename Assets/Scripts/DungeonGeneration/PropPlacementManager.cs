@@ -25,6 +25,11 @@ public class PropPlacementManager : MonoBehaviour
         RoomController.OnRoomGenFinished += ProcessRoom;
     }
 
+    private void OnDestroy()
+    {
+        RoomController.OnRoomGenFinished -= ProcessRoom;
+    }
+
     private void Awake()
     {
         roomData = room.roomData;

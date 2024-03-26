@@ -19,6 +19,11 @@ public class CrawlController : MonoBehaviour
         {Direction.right, Vector2Int.right}
     };
 
+    private void OnDestroy()
+    {
+        positionsVisited.Clear();
+    }
+
     /* Adds a number of crawlers at 0,0 who will then use the Move function to 
      * add a new position at every location they visit for a random amount of 
      * iterations, all dependent on the GenData ScriptableObject. 
