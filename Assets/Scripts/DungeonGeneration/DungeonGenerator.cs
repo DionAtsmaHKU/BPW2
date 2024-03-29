@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This script calls the GenerateDungeon function and spawns the rooms in the right places.
 public class DungeonGenerator : MonoBehaviour
 {
     public GenData genData;
@@ -22,7 +22,6 @@ public class DungeonGenerator : MonoBehaviour
         RoomController.instance.LoadRoom("Tutorial", 15, 15);
         foreach (Vector2Int roomLocation in rooms)
         {
-            //RoomController.instance.LoadRoom("Empty", roomLocation.x, roomLocation.y); Debug.Log("case");
             RoomController.instance.LoadRoom("Empty", roomLocation.x, roomLocation.y);
         }
     }

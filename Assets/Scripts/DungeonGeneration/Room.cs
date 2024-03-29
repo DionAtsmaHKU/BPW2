@@ -1,9 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
 
+// Data about the tiles, props and enemies in the room
 public class RoomData
 {
     public HashSet<Vector2Int> Path { get; set; } = new HashSet<Vector2Int>();
@@ -16,26 +15,27 @@ public class RoomData
     public HashSet<Vector2Int> InnerTiles { get; set; } = new HashSet<Vector2Int>();
     public HashSet<Vector2Int> PropPositions { get; set; } = new HashSet<Vector2Int>();
     public List<GameObject> PropObjectRefrences { get; set; } = new List<GameObject>();
-    public List<Vector2Int> PositionsAccessibleFromPath { get; set; } = new List<Vector2Int>();
     public List<GameObject> EnemiesInRoom { get; set; } = new List<GameObject>();
 }
 
+// This script handles all the functions a single room uses.
 public class Room : MonoBehaviour
 {
+    public RoomData roomData;
+
+    public Door leftDoor, rightDoor, topDoor, bottomDoor;
+    public List<Door> doors = new List<Door>();
+
     public int width;
     public int height;
     public int x;
     public int y;
     public Vector2Int worldOrigin;
-
     public GameObject tutWall;
 
     [SerializeField] private Tilemap floorMap, colliderMap;
     [SerializeField] private TileBase[] pathTile;
     [SerializeField] private TileBase[] floorTile;
-
-    public RoomDataExtractor roomDataExtractor;
-    public RoomData roomData;
 
     public Room(int temp_x, int temp_y)
     {
@@ -44,17 +44,7 @@ public class Room : MonoBehaviour
 
     }
 
-    public Door leftDoor, rightDoor, topDoor, bottomDoor;
-    public List<Door> doors = new List<Door>();
-
-    public bool showGizmo = false;
     private bool updatedDoors = false;
-
-
-    private void OnEnable()
-    {
-        ;
-    }
 
     private void Awake()
     {
@@ -71,8 +61,7 @@ public class Room : MonoBehaviour
             return;
         }
 
-        // Collecting the doors and ordering them by type. (?)
-        // THIS NEXT LINE DOESN'T WORK IN MONOBEHAVIOUR
+        // Collecting the doors and ordering them by type.
         Door[] ds = GetComponentsInChildren<Door>();
         foreach (Door d in ds)
         {
@@ -94,7 +83,6 @@ public class Room : MonoBehaviour
         RoomController.instance.RegisterRoom(this);
     }
 
-    // Call this somehwere else
     private void Update()
     {
         if (name.Contains("End") && !updatedDoors)
@@ -104,7 +92,7 @@ public class Room : MonoBehaviour
         }
     }
 
-    // Removes all doors that lead to nowhere.
+    // Removes all doors that lead to nowhere and adds paths between rooms using the PlacePaths function.
     public void RemoveUnconnectedDoors()
     {
         foreach(Door door in doors)
@@ -116,14 +104,12 @@ public class Room : MonoBehaviour
                     {
                         door.gameObject.SetActive(false);
                         roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin + new Vector2Int(width / 2, 0)));
-                        // PlacePaths(roomCentre, roomCentre + new Vector2Int(width / 2, 0));
                     }
                     break;
                 case Door.DoorType.left:
                     if (GetLeft() != null)
                     {
                         door.gameObject.SetActive(false);
-                        // PlacePaths(roomCentre, roomCentre - new Vector2Int(width/2, 0));
                         roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin - new Vector2Int(width / 2, 0)));
                     }
                     break;
@@ -132,7 +118,6 @@ public class Room : MonoBehaviour
                     {
                         door.gameObject.SetActive(false);
                         roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin + new Vector2Int(0, height / 2)));
-                        // PlacePaths(roomCentre, roomCentre + new Vector2Int(0, height / 2));
                     }
                     break;
                 case Door.DoorType.bottom:
@@ -140,62 +125,43 @@ public class Room : MonoBehaviour
                     {
                         door.gameObject.SetActive(false);
                         roomData.Path.UnionWith(PlacePaths(worldOrigin, worldOrigin - new Vector2Int(0, height / 2)));
-                        // PlacePaths(roomCentre, roomCentre - new Vector2Int(0, height / 2));
                     }
                     break;
             }
         }
     }
 
+    // This function finds where there's supposed to be floor tiles, and places a random floor tile there.
     public HashSet<Vector2Int> PlaceFloor()
     {
         if (name.Contains("Start") || name.Contains("End") || name.Contains("Tutorial")) {
             return null;
         }
-        // Debug.Log(new Vector4(x, y, width, height));
-        // Vector2Int roomCentre = GetRoomCentre()/2;
-        Vector2Int roomCentre = GetRoomCentre();
-        // Vector2Int roomCentre = worldOrigin;
-        /*
-        int leftLimit = roomCentre.x - width / 2 - 2;
-        int rightLimit = roomCentre.x + width / 2 - 2;
-        int downLimit = roomCentre.y - height / 2 - 2;
-        int upLimit = roomCentre.y + height / 2 - 2;
-        */
 
-        
+        Vector2Int roomCentre = GetRoomCentre(); 
         int leftLimit = roomCentre.x - width/2 + 2;
         int rightLimit = roomCentre.x + width/2;
         int downLimit = roomCentre.y - height/2 + 2;
         int upLimit = roomCentre.y + height/2;
-        
 
         for (int i = leftLimit; i <= rightLimit; i++) 
         { 
             for (int j = downLimit; j <= upLimit; j++)
             {
-                // Vector2Int position = roomCentre + new Vector2Int(i, j);
-                // Vector3Int positionInt = floorMap.WorldToCell(position);
                 Vector2 position = new Vector2Int(i, j);
                 Vector3Int positionInt = floorMap.WorldToCell(position);
-                // Vector3Int positionInt = new Vector3Int(position.x, position.y);
                 roomData.Floor.Add((Vector2Int)positionInt);
                 floorMap.SetTile(positionInt, floorTile[Random.Range(0, 3)]);
-                // instead: random floortile
             }
         }
 
         HashSet<Vector2Int> floorTiles = new();
-        // Vector3Int centreInt = floorMap.WorldToCell((Vector2)roomCentre);
-        // colliderMap.SetTile(centreInt, pathTile);
-
         return floorTiles;
     }
 
+    // This function places the paths between rooms and returns these paths as a HashSet of Vector2Int's.
     private HashSet<Vector2Int> PlacePaths(Vector2Int startPos, Vector2Int endPos)
     {
-        // Debug.Log(startPos);
-
         // Create a hashset and add start and end positions to it
         HashSet<Vector2Int> pathTiles = new() { startPos, endPos };
         floorMap.SetTile((Vector3Int)startPos, pathTile[Random.Range(0, 3)]);
@@ -210,13 +176,15 @@ public class Room : MonoBehaviour
         {
             currentPos += direction;
             pathTiles.Add(currentPos);
-            // Debug.Log("Placing at: " + currentPos);
             floorMap.SetTile((Vector3Int)currentPos, null);
             floorMap.SetTile((Vector3Int)currentPos, pathTile[Random.Range(0, 3)]);
         }
 
         return pathTiles;
     }
+
+    /* The next four functions find whether there is a room to the top, bottom,
+     * left or right of the current room and returns that room. */
 
     public Room GetRight()
     {
@@ -254,18 +222,9 @@ public class Room : MonoBehaviour
         else { return null; }
     }
 
-    // Draws the room's bounds
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(transform.position, new Vector3(width, height, 0));
-    }
-
     // Returns the centre of the room as a Vector3 (with z = 0)
     public Vector2Int GetRoomCentre()
     {
-        //return new Vector2Int(x * (width - 1), y * (height - 1));
-        // Debug.Log(new Vector2Int(x * width - 1, y * height - 1));
         return new Vector2Int(x * width - 1, y * height - 1);
     }
 
@@ -277,11 +236,9 @@ public class Room : MonoBehaviour
         }
     }
 
+    // This functions finds to which HashSet each tile in the room belongs
     public void ProcessRooms()
     {
-        //foreach (Room room in roomController.loadedRooms)
-        //{
-        // RoomData roomData = room.roomData;
         if (roomData == null)
             return;
 
@@ -320,72 +277,11 @@ public class Room : MonoBehaviour
             {
                 roomData.InnerTiles.Add(tilePosition);
             }
-            //}
 
             roomData.NearWallTilesDown.ExceptWith(roomData.CornerTiles);
             roomData.NearWallTilesUp.ExceptWith(roomData.CornerTiles);
             roomData.NearWallTilesLeft.ExceptWith(roomData.CornerTiles);
             roomData.NearWallTilesRight.ExceptWith(roomData.CornerTiles);
         }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        //foreach (Room room in roomController.loadedRooms)
-        //{
-        //   RoomData roomData = room.roomData;
-
-        if (roomData == null || !showGizmo)
-            return;
-
-        //Draw inner tiles
-        Gizmos.color = Color.yellow;
-        foreach (Vector2Int floorPosition in roomData.InnerTiles)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //Draw near wall tiles UP
-        Gizmos.color = Color.blue;
-        foreach (Vector2Int floorPosition in roomData.NearWallTilesUp)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //Draw near wall tiles DOWN
-        Gizmos.color = Color.green;
-        foreach (Vector2Int floorPosition in roomData.NearWallTilesDown)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //Draw near wall tiles RIGHT
-        Gizmos.color = Color.white;
-        foreach (Vector2Int floorPosition in roomData.NearWallTilesRight)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //Draw near wall tiles LEFT
-        Gizmos.color = Color.cyan;
-        foreach (Vector2Int floorPosition in roomData.NearWallTilesLeft)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //Draw near wall tiles CORNERS
-        Gizmos.color = Color.magenta;
-        foreach (Vector2Int floorPosition in roomData.CornerTiles)
-        {
-            if (roomData.Path.Contains(floorPosition))
-                continue;
-            Gizmos.DrawCube(floorPosition + GetRoomCentre() + Vector2.one * 2, Vector2.one);
-        }
-        //}
     }
 }

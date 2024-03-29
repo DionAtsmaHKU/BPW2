@@ -1,11 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using System;
-using static UnityEngine.EventSystems.EventTrigger;
-using UnityEditor.Experimental.GraphView;
-using Unity.Burst.CompilerServices;
 
 public class PlayerController : MonoBehaviour
 {
@@ -141,17 +136,17 @@ public class PlayerController : MonoBehaviour
         if (attackRoll + enemy.enemyDef <= attack)
         {
             enemy.hp -= 10;
-            SpawnPopUp(false, true, 10);
+            SpawnPopUp(false, true, 10, true);
             turnManager.playerMoves--;
             StartCoroutine(WaitAfterAttack());
-            // hitSound.Play();
+            hitSound.Play();
         }
         else 
         { 
-            SpawnPopUp(false, false, 0);
+            SpawnPopUp(false, false, 0, true);
             turnManager.playerMoves--;
             StartCoroutine(WaitAfterAttack());
-            // missSound.Play();
+            missSound.Play();
         }
     }
 
@@ -173,7 +168,7 @@ public class PlayerController : MonoBehaviour
                 attackStance = true;
             }
             turnManager.playerMoves--;
-            SpawnPopUp(true, false, 0);
+            SpawnPopUp(true, false, 0, true);
         }
     }
 
@@ -184,14 +179,14 @@ public class PlayerController : MonoBehaviour
         if (attackRoll + enemyAtt >= defense)
         {
             onPlayerHit.Invoke();
-            SpawnPopUp(false, true, 10);
-            // hitSound.Play();
+            SpawnPopUp(false, true, 10, false);
+            hitSound.Play();
         }
         else 
         { 
             // Debug.Log("miss :("); 
-            SpawnPopUp(false, false, 0);
-            // missSound.Play();
+            SpawnPopUp(false, false, 0, false);
+            missSound.Play();
         }
     }
 
@@ -211,13 +206,14 @@ public class PlayerController : MonoBehaviour
         {
             transform.position = Vector3.zero;
             movePoint.transform.position = Vector3.zero;
-            // warpSound.Play();
+            warpSound.Play();
             StartCoroutine(SetCamSpeed());
+            GameManager.instance.EndTutorial();
         }
         else if (collision.CompareTag("Win"))
         {
             GameManager.Instance.WinGame();
-            // warpSound.Play();
+            warpSound.Play();
         }
     }
 
@@ -237,7 +233,7 @@ public class PlayerController : MonoBehaviour
 
     /* Spawns a pop-up of text, either after a player hits or misses an enemy,
      * an enemy hits or misses the player, or when the player chances stances. */
-    private void SpawnPopUp(bool stanceChange, bool hit, int damage)
+    private void SpawnPopUp(bool stanceChange, bool hit, int damage, bool byPlayer)
     {
         Vector3 randomOffset = new Vector3(UnityEngine.Random.Range(20, 40),
             UnityEngine.Random.Range(20, 40), 1);
@@ -260,6 +256,6 @@ public class PlayerController : MonoBehaviour
         {
             textToDisplay = "Miss...";
         }
-        textToSpawn.DisplayText(textToDisplay);
+        textToSpawn.DisplayText(textToDisplay, byPlayer);
     }
 }

@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
 using System.Linq;
 using System;
 
+// Contains the basic info of each room
 public class RoomInfo
 {
     public string name;
@@ -14,82 +13,28 @@ public class RoomInfo
     public int y;
 }
 
+/* This script handles the loading of queueing and loading of new rooms, as well as
+ * registering rooms, and containing functions to find certain rooms. */
 public class RoomController : MonoBehaviour
 {
-    public static RoomController instance;
+    public static RoomController instance; 
+    public static event Action OnRoomGenFinished;
+
     [SerializeField] TurnManager turnManager;
+
     public List<Room> loadedRooms = new List<Room>();
 
     private string currentWorldName = "Main";
     private RoomInfo currentLoadRoomData;
     private Queue<RoomInfo> loadRoomQueue = new Queue<RoomInfo>();
-    private Room currentRoom;
 
     private bool isLoadingRoom = false;
     private bool spawnedBossRoom = false;
     private bool updatedRooms = false;
 
-    public static event Action OnRoomGenFinished;
-
     private void Awake()
     {
         instance = this;
-    }
-
-    private void Start()
-    {
-        // TestRooms();
-    }
-
-    // Generates rooms in a pattern
-    private void TestRooms()
-    {
-        LoadRoom("Start", 0, 0);
-        LoadRoom("Empty", 1, 0);
-        LoadRoom("Empty", 2, 0);
-        LoadRoom("Empty", 3, 0);
-        LoadRoom("Empty", 4, 0);
-        LoadRoom("Empty", 5, 0);
-        LoadRoom("Empty", -1, 0);
-        LoadRoom("Empty", -2, 0);
-        LoadRoom("Empty", -3, 0);
-        LoadRoom("Empty", -4, 0);
-        LoadRoom("Empty", -5, 0);
-        LoadRoom("Empty", 0, 1);
-        LoadRoom("Empty", 0, 2);
-        LoadRoom("Empty", 0, 3);
-        LoadRoom("Empty", 0, 4);
-        LoadRoom("Empty", 0, 5);
-        LoadRoom("Empty", 0, -1);
-        LoadRoom("Empty", 0, -2);
-        LoadRoom("Empty", 0, -3);
-        LoadRoom("Empty", 0, -4);
-        LoadRoom("Empty", 0, -5);
-        LoadRoom("Empty", -3, 1);
-        LoadRoom("Empty", -3, 2);
-        LoadRoom("Empty", -3, 3);
-        LoadRoom("Empty", -3, 4);
-        LoadRoom("Empty", 2, 1);
-        LoadRoom("Empty", 2, 2);
-        LoadRoom("Empty", 2, 3);
-        LoadRoom("Empty", 2, 4);
-        LoadRoom("Empty", 4, 1);
-        LoadRoom("Empty", 4, 2);
-        LoadRoom("Empty", 4, 3);
-        LoadRoom("Empty", -4, -1);
-        LoadRoom("Empty", -4, -2);
-        LoadRoom("Empty", -4, -3);
-        LoadRoom("Empty", -4, -4);
-        LoadRoom("Empty", -2, -1);
-        LoadRoom("Empty", -2, -2);
-        LoadRoom("Empty", -2, -3);
-        LoadRoom("Empty", -2, -4);
-        LoadRoom("Empty", 2, -1);
-        LoadRoom("Empty", 2, -2);
-        LoadRoom("Empty", 2, -3);
-        LoadRoom("Empty", 2, -4);
-        LoadRoom("Empty", 3, -4);
-        LoadRoom("Empty", 4, -4);
     }
 
     private void Update()
@@ -97,7 +42,7 @@ public class RoomController : MonoBehaviour
         UpdateRoomQueue();
     }
 
-    /* Loads the next room in the queueif there is one to be loaded and there 
+    /* Loads the next room in the queue if there is one to be loaded and there 
      * currently isn't already another room being loaded. */
     private void UpdateRoomQueue()
     {
@@ -114,6 +59,7 @@ public class RoomController : MonoBehaviour
             }
             else if (spawnedBossRoom && !updatedRooms)
             {
+                // Processing the individual rooms
                 foreach (Room room in loadedRooms)
                 {
                     room.PlaceFloor();
@@ -122,22 +68,22 @@ public class RoomController : MonoBehaviour
                 }
                 updatedRooms = true;
                 OnRoomGenFinished.Invoke();
-                // OnRoomsProcessed.Invoke();
             }
             return;
         }
 
+        // Loads the next room in the queue
         currentLoadRoomData = loadRoomQueue.Dequeue();
         isLoadingRoom = true;
-
         StartCoroutine(LoadRoomRoutine(currentLoadRoomData));
     }
 
-    // IMPORTANT !!! understand soon
+    // Spawns the final room by replacing the room placed last in the generation with the preset End Room.
     IEnumerator SpawnBossRoom()
     {
         spawnedBossRoom = true;
         yield return new WaitForSeconds(0.5f);
+
         if (loadRoomQueue.Count == 0)
         {
             Room bossRoom = loadedRooms[loadedRooms.Count - 1];
@@ -148,7 +94,7 @@ public class RoomController : MonoBehaviour
             loadedRooms.Remove(roomToRemove);
             LoadRoom("End", tempRoom.x, tempRoom.y);
 
-            // Remove placed props
+            // Remove placed props in the End Room
             foreach (GameObject prop in bossRoom.roomData.PropObjectRefrences)
             {
                 Destroy(prop);
@@ -167,7 +113,6 @@ public class RoomController : MonoBehaviour
 
         RoomInfo newRoomData = new RoomInfo();
         newRoomData.name = name;
-        // Debug.Log(newRoomData.name);
         newRoomData.x = x;
         newRoomData.y = y;
 
@@ -178,7 +123,6 @@ public class RoomController : MonoBehaviour
     IEnumerator LoadRoomRoutine(RoomInfo info)
     {
         string roomName = currentWorldName + info.name;
-        // Debug.Log("Actual name: " + currentWorldName + info.name);
         AsyncOperation loadRoom = SceneManager.LoadSceneAsync(roomName, LoadSceneMode.Additive);
 
         while (!loadRoom.isDone)
@@ -200,15 +144,12 @@ public class RoomController : MonoBehaviour
 
         room.transform.position = new Vector3(currentLoadRoomData.x * room.width,
                                               currentLoadRoomData.y * room.height);
-
         room.x = currentLoadRoomData.x;
         room.y = currentLoadRoomData.y;
         room.name = currentWorldName + " - " + currentLoadRoomData.name + " " + room.x + " - " + room.y;
-        // Debug.Log("room.name = " + room.name);
         room.transform.parent = transform;
 
         isLoadingRoom = false;
-
         if (loadedRooms.Count == 0)
         {
             CameraController.instance.currentRoom = room;
@@ -223,6 +164,7 @@ public class RoomController : MonoBehaviour
         return loadedRooms.Find(item => item.x == x && item.y == y) != null; 
     }
 
+    // Finds the room at coordinates (x, y).
     public Room FindRoom(int x, int y)
     {
         return loadedRooms.Find(item => item.x == x && item.y == y);
@@ -233,6 +175,5 @@ public class RoomController : MonoBehaviour
     {
         turnManager.roomEnemies.Clear();
         CameraController.instance.currentRoom = room;
-        currentRoom = room;
     }
 }

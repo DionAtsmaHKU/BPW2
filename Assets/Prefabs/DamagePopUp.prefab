@@ -61,6 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popUp: {fileID: 7131864976035693146}
+  outline: {fileID: 227316176279225072}
 --- !u!114 &7131864976035693146
 MonoBehaviour:
   m_ObjectHideFlags: 0

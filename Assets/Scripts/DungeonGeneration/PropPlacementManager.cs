@@ -1,12 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.UIElements;
 
+// This script places props and enemies in empty rooms.
 public class PropPlacementManager : MonoBehaviour
 {
     [SerializeField] Room room;
@@ -34,7 +31,9 @@ public class PropPlacementManager : MonoBehaviour
     {
         roomData = room.roomData;
     }
-
+    
+    /* This function decides which props go on which tiles (corners, near walls,
+     * or near the middle of the room) and uses PlaceCornerProps to place them. */
     public void ProcessRoom()
     {
         if (room == null || roomData == null || room.name.Contains("Start"))
@@ -43,7 +42,6 @@ public class PropPlacementManager : MonoBehaviour
         // Places tutorial enemy
         if (room != null && room.name.Contains("Tutorial"))
         {
-            // Debug.Log("Placing tutorial enemy");
             GameObject enemy = Instantiate(tutorialEnemyPrefab);
             room.roomData.EnemiesInRoom.Add(enemy);
             Enemy enemyScript = enemy.GetComponent<Enemy>();
@@ -51,8 +49,6 @@ public class PropPlacementManager : MonoBehaviour
             return;
         }
 
-
-        
         // Place props in corners
         List<Prop> cornerProps = propsToPlace.Where(x => x.corner).ToList();
         PlaceCornerProps(cornerProps);
@@ -93,6 +89,7 @@ public class PropPlacementManager : MonoBehaviour
         PlaceProps(innerProps, roomData.InnerTiles, PlacementOriginCorner.BottomLeft);
     }
 
+    // This function places the inner props and wall props based on the given placement, availableTiles and wallProps input.
     private void PlaceProps(List<Prop> wallProps, HashSet<Vector2Int> availableTiles, PlacementOriginCorner placement)
     {
         // Remove path positions from the initial nearWallTiles so nothing spawns there
@@ -116,9 +113,9 @@ public class PropPlacementManager : MonoBehaviour
         }
     }
 
+    // Tries to brute-force place props at position placement according to the list of availablePositions.
     private bool TryPlacingPropBruteForce(Prop propToPlace, List<Vector2Int> availablePositions, PlacementOriginCorner placement) 
     {
-        // Try placing objects at the palcement
         for (int i = 0; i < availablePositions.Count; i++)
         {
             Vector2Int position = availablePositions[i];
@@ -142,6 +139,10 @@ public class PropPlacementManager : MonoBehaviour
         return false;
     }
 
+    /* This function checks whether a prop fits by checking from which corner it's placing the object,
+     * and seeing if there's any props that it would overlap with, depending on the prop's size.
+     * It adds the free positions to the freePositions List<Vector2Int> and returns this list. */
+    
     private List<Vector2Int> TryToFitProp(Prop prop, List<Vector2Int> availablePositions, 
         Vector2Int origin, PlacementOriginCorner placement)
     {
@@ -199,6 +200,7 @@ public class PropPlacementManager : MonoBehaviour
         return freePositions;
     }
 
+    // Places props in the corners based on the cornerPropPlacementChance.
     private void PlaceCornerProps(List<Prop> cornerProps)
     {
         float tempChance = cornerPropPlacementChance;
@@ -209,12 +211,6 @@ public class PropPlacementManager : MonoBehaviour
             {
                 Prop propToPlace = cornerProps[UnityEngine.Random.Range(0, cornerProps.Count)];
                 PlacePropGameObjectAt(cornerTile, propToPlace);
-
-                /*
-                if (propToPlace.placeAsGroup)
-                {
-                    PlaceGroupObject(cornerTile, propToPlace, 2);
-                } */
             }
             else
             {
@@ -223,6 +219,8 @@ public class PropPlacementManager : MonoBehaviour
         }
     }
 
+    /* This function instantiates the prop propToPlace or an enemy at the input placementPosition, 
+     * giving it its sprite, collider and positio, and adding it to lists. */
     private GameObject PlacePropGameObjectAt(Vector2Int placementPosition, Prop propToPlace)
     {
         // Instantiate prop or enemy
@@ -256,27 +254,17 @@ public class PropPlacementManager : MonoBehaviour
         Vector2 size = new Vector2(propToPlace.propSize.x * 0.8f, propToPlace.propSize.y * 0.8f);
         col.size = size;
 
-        prop.transform.localPosition = (Vector2)placementPosition;
         // Adjust sprite position
+        prop.transform.localPosition = (Vector2)placementPosition;
         propSpriteRenderer.transform.localPosition = (Vector2)propToPlace.propSize * 0.5f + room.GetRoomCentre() + Vector2.one * 1.5f;
 
-        // Add to StopMovement layer
-        // Debug.Log("Layer voor: " + prop.layer);
-        // prop.layer = 6;
-        // prop.layer = LayerMask.NameToLayer("StopMovement");
-        // Debug.Log("Layer na: " + prop.layer);
-        // Save the prop in roomData
-
+        // Adds the prop and its position into lists.
         roomData.PropPositions.Add(placementPosition);
         roomData.PropObjectRefrences.Add(prop);
         return prop;
     }
 
-    private void PlaceGroupObject(Vector2Int groupOriginPos, Prop propToPlace, int searchOffset)
-    {
-        //
-    }
-
+    // Enum for the 4 diagonal directions for placement origins.
     public enum PlacementOriginCorner
     { 
         BottomLeft, BottomRight, TopLeft, TopRight

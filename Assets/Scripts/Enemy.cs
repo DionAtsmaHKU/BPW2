@@ -1,15 +1,11 @@
-using System.Collections;
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.VisualScripting;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
     public Room homeRoom;
+    public int hp = 10;
+    public int enemyAtt = 2;
+    public int enemyDef = 2;
 
     private CameraController cameraController;
     private TurnManager turnManager;
@@ -18,57 +14,46 @@ public class Enemy : MonoBehaviour
     private Transform playerTransform;
 
     private bool enemyActivated = false;
-    // private bool desynced = false;
-    public int hp = 10;
-    public int enemyAtt = 2;
-    public int enemyDef = 2;
-    // private float moveSpeed = 5f;
 
-    // Start is called before the first frame update
     void Start()
     {
         if (tag == "TutorialEnemy")
         {
-            // Debug.Log("TUtorial awenmy");
             GameManager.Instance.onTutorialStart += AddTutorialEnemy;
         }
 
         cameraController = FindAnyObjectByType<CameraController>();
         turnManager = FindAnyObjectByType<TurnManager>();
-
         playerController = FindAnyObjectByType<PlayerController>();
         player = playerController.gameObject;
         playerTransform = player.transform;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
         if (hp <= 0)
         {
-            // Debug.Log("enemy dies !!!");
-
+            /* The enemy dies if its hp reaches zero, giving the player 10 hp back, 
+             * and removing the enemy from the roomEnemies List, as well as destroying it. */
             if (tag == "TutorialEnemy")
             {
                 cameraController.currentRoom.tutWall.SetActive(false);
-                playerController.hp = 90;
+                playerController.hp = 40;
             }
             playerController.hp += 10;
-            if (playerController.hp > 100) {
-                playerController.hp = 100;
+            if (playerController.hp > 50) {
+                playerController.hp = 50;
             }
 
             turnManager.roomEnemies.Remove(this);
             Destroy(gameObject);
         }
         
-
+        // Enemies are only activated when the current room is their homeRoom.
         if (cameraController.currentRoom != homeRoom)
         {
             enemyActivated = false;
         }
-
         if (IsEnemyActive())
         {
             enemyActivated = true;
@@ -77,6 +62,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // Checks whether the enemy should be active, depending on the currentRoom and enemy homeRoom.
     private bool IsEnemyActive()
     {
         if (cameraController.currentRoom == null || homeRoom == null)
@@ -89,9 +75,10 @@ public class Enemy : MonoBehaviour
             return false;
     }
 
+    /* The enemy's turn. It checks its position relative to the player, and either
+     * attacks the player if it's in range, or attempts to move towards the player. */
     public void EnemyTurn()
     {
-        // Debug.Log("Enemy Turn!");
         Vector2 relativePos;
 
         if (homeRoom == RoomController.instance.loadedRooms[1])
@@ -104,12 +91,9 @@ public class Enemy : MonoBehaviour
                           (Vector2)playerTransform.position + new Vector2(2, 2);
         }
 
-        
-
-        if (relativePos.magnitude <= 1.1) // player in range
+        if (relativePos.magnitude <= 1.1) // Player in range
         {
             // Attack player, 
-            // Debug.Log("Enemy Attacks!");
             playerController.EnemyAttack(enemyAtt);
             turnManager.enemyMoves--;
         }
@@ -122,9 +106,9 @@ public class Enemy : MonoBehaviour
         
     }
 
+    // The enemy tries to move towards the player, as long as it doesn't walk into a wall.
     private void MoveTowardsPlayer(Vector2 relativePos)
     {
-        // Debug.Log(relativePos);
         if (relativePos.x >= 0 && relativePos.x >= relativePos.y)
         {
             CheckForWalls(new Vector3(-1, 0, 0));
@@ -154,6 +138,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // The enemy checks if it is walking into a wall or a different enemy, otherwise it moves towards the targetPos.
     private void CheckForWalls(Vector3 targetPos)
     {
         Vector2 currentPos = (Vector2)transform.position + cameraController.currentRoom.GetRoomCentre() + new Vector2(2, 2);
@@ -164,9 +149,9 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    // Adds the tutorial enemy.
     public void AddTutorialEnemy()
     {
         turnManager.roomEnemies.Add(this);
-        // Debug.Log("adding enemy now");
     }
 }

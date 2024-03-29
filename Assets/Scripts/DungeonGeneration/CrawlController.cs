@@ -1,13 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
+// Reference to the four possible directions
 public enum Direction
 {
     up = 0, left = 1, down = 2, right = 3
 };
 
+// This script handles the crawlers and generates a dungeon using their movement, and is called in the DungeonGenerator.
 public class CrawlController : MonoBehaviour
 {
     public static List<Vector2Int> positionsVisited = new List<Vector2Int>();
@@ -27,15 +27,13 @@ public class CrawlController : MonoBehaviour
     /* Adds a number of crawlers at 0,0 who will then use the Move function to 
      * add a new position at every location they visit for a random amount of 
      * iterations, all dependent on the GenData ScriptableObject. 
-     *  Returns the positions visited as a List of Vector2Int's. */
+     * Returns the positions visited as a List of Vector2Int's. */
     public static List<Vector2Int> GenerateDungeon(GenData dungeonData)
     {
         List<Crawler> dungeonCrawlers = new List<Crawler>();
 
         for (int i = 0; i < dungeonData.numberOfCrawlers; i++)
         {
-            // make instance first?
-            // GameObject go = (GameObject)GameObject.Instantiate(null);
             GameObject go = new GameObject();
             Crawler c = go.AddComponent<Crawler>();
             dungeonCrawlers.Add(c);
@@ -43,7 +41,6 @@ public class CrawlController : MonoBehaviour
         }
 
         int iterations = Random.Range(dungeonData.iterationMin, dungeonData.iterationMax);
-
         for (int i = 0; i < iterations; i++)
         {
             foreach(Crawler dungeonCrawler in dungeonCrawlers)

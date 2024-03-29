@@ -1,20 +1,19 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/* This script handles which UI elements should be active at which stage of the game.
+ *lso is able to restart the game by unloading all scenes and reloading Main. */
 public class GameManager : MonoBehaviour
-{
+{   
+    public Action onTutorialStart;
+
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject mainMenuUI, gameOverUI, startImageUI, winUI, hpUI, tutorialUI;
     [SerializeField] private Text hpText;
-
     private PlayerController playerController;
-
-    public Action onTutorialStart;
 
     // GameManager singleton for easy access across the project
     public static GameManager instance;
@@ -50,17 +49,18 @@ public class GameManager : MonoBehaviour
         RoomController.OnRoomGenFinished -= LoadingScreen;
     }
 
-    // Start is called before the first frame update
     void Start()
     {
        playerController = player.GetComponent<PlayerController>();
     }
 
+    // Updates the hpText depending on the player's current hp.
     private void Update()
     {
         hpText.text = "HP: " + playerController.hp.ToString();
     }
 
+    // Starts the game and activates the tutorial
     public void StartGame()
     {
         hpUI.SetActive(true);
@@ -68,7 +68,7 @@ public class GameManager : MonoBehaviour
         onTutorialStart.Invoke();
     }
 
-    // doesn't work yet
+    // Restarts the game by unloading all scenes and reloading Main.
     public void RestartGame()
     {
         onTutorialStart -= StartTutorial;
@@ -80,33 +80,42 @@ public class GameManager : MonoBehaviour
         }
         SceneManager.LoadScene("Main");
     }
-    
+
+    // Ends the tutorial and deactivates the tutorial UI.
+    public void EndTutorial()
+    {
+        tutorialUI.SetActive(false);
+    }
+
+    // Activates the UI when a Game Over occurs.
     public void GameOver()
     {
-        Debug.Log("Game Over");
         player.SetActive(false);
         gameOverUI.SetActive(true);
     }
 
+    // Activates the UI when the player wins.
     public void WinGame()
     {
-        Debug.Log("Win!");
         player.SetActive(false);
         winUI.SetActive(true);
     }
 
+    // Starts the tutorial
     void StartTutorial()
     {
-        // RoomController.instance.OnPlayerEnterRoom(RoomController.instance.loadedRooms[1]);
+        tutorialUI.SetActive(true);
         playerController.movePoint.position += new Vector3(280, 165, 0);
         player.transform.position += new Vector3(280, 165, 0);
     }
 
+    // Starts the delay coroutine.
     void LoadingScreen()
     {
         StartCoroutine(StartDelay());
     }
 
+    // Starts the delay between the rooms finishing loading and starting the game.
     IEnumerator StartDelay()
     {
         yield return new WaitForSeconds(1);

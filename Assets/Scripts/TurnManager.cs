@@ -2,20 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// This script manages the turn-based movement and combat system.
 public class TurnManager : MonoBehaviour
 {
     [SerializeField] CameraController cameraController;
     [SerializeField] PlayerController playerController;
+
     public List<Enemy> roomEnemies = new List<Enemy>();
     public int enemyMoves;
     public int playerMoves;
     public bool switchingTurn;
     public bool playerTurn;
 
-    // Update is called once per frame
     void Update()
     {
-        // For Start and End room
+        // For Start and End room the player can move all the time.
         if (roomEnemies.Count == 0)
         {
             playerTurn = true;
@@ -24,7 +25,7 @@ public class TurnManager : MonoBehaviour
             return;
         } 
  
-        // Transition turn
+        // Transition turn from player to enemy or vice versa
         if (!switchingTurn && playerTurn && playerMoves <= 0)
         {
             StartCoroutine(TurnSwitchCooldown());
@@ -35,12 +36,14 @@ public class TurnManager : MonoBehaviour
         }
     }
 
+    // The player gets two moves on their turn
     private void PlayerTurn()
     {
         playerController.turnSteps = 0;
         playerMoves = 2;
     }
 
+    // The enemies each get one move, and move independent from each other with a short delay.
     private IEnumerator EnemyTurn()
     {
         enemyMoves = roomEnemies.Count;
@@ -51,7 +54,7 @@ public class TurnManager : MonoBehaviour
         }
     }
 
-    // Swap turn (in 1 second)
+    // Swap turns with a 1 second delay
     public IEnumerator TurnSwitchCooldown()
     {
         switchingTurn = true;

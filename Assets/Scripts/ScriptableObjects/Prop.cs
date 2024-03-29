@@ -1,7 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/* This ScriptableObject contains the data for each prop, like its sprite, size,
+ * where it should be placed, how many should be placed, or if it's a (big) enemy.
+ * This is used in the PropPlacementManager to place the prop or enemy. */
 [CreateAssetMenu]
 public class Prop : ScriptableObject
 {
@@ -22,14 +23,4 @@ public class Prop : ScriptableObject
     public int quantityMin = 1;
     [Min(1)]
     public int quantityMax = 1;
-
-    /*
-    [Space, Header("Group placement:")]
-    public bool placeAsGroup = false;
-    [Min(1)]
-    public int minGroupCount = 1;
-    [Min(1)]
-    public int maxGroupCount = 1;
-    8
-    */
 }
